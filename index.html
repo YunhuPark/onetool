@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OneTool Maker</title>
+    <style>
+        :root { --bg: #101010; --card: #1e1e1e; --text: #ffffff; --sub: #888; --accent: #0095f6; --hover: #2a2a2a; }
+        body { margin: 0; padding: 20px; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; line-height: 1.5; }
+        
+        .header { text-align: center; margin: 40px 0 60px; }
+        .logo { font-size: 24px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 10px; }
+        .logo span { color: var(--accent); }
+        .desc { color: var(--sub); font-size: 14px; }
+
+        /* 카드 그리드 레이아웃 */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; max-width: 600px; margin: 0 auto; }
+        
+        .card { background: var(--card); border: 1px solid #333; border-radius: 16px; padding: 20px; text-decoration: none; color: inherit; transition: all 0.2s ease; display: flex; flex-direction: column; align-items: center; text-align: center; }
+        .card:hover { transform: translateY(-3px); background: var(--hover); border-color: var(--accent); }
+        
+        .icon { font-size: 32px; margin-bottom: 15px; }
+        .title { font-size: 16px; font-weight: 700; margin-bottom: 5px; }
+        .subtitle { font-size: 12px; color: var(--sub); word-break: keep-all; }
+
+        .footer { text-align: center; margin-top: 60px; color: var(--sub); font-size: 12px; }
+        .footer a { color: var(--sub); text-decoration: underline; }
+
+        /* 모바일 최적화 */
+        @media (max-width: 480px) {
+            .grid { grid-template-columns: 1fr; } /* 모바일에선 한 줄로 꽉 차게 */
+            .card { flex-direction: row; text-align: left; padding: 15px 20px; }
+            .icon { margin-bottom: 0; margin-right: 15px; font-size: 28px; }
+            .text-group { display: flex; flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="logo">OneTool <span>Lab</span></div>
+        <div class="desc">복잡한 건 딱 질색.<br>필요한 기능만 1초 만에 쓰세요.</div>
+    </div>
+
+    <div class="grid">
+        <a href="timer.html" class="card">
+            <div class="icon">🏃💨</div>
+            <div class="text-group">
+                <div class="title">칼퇴 계산기</div>
+                <div class="subtitle">집에 가기까지 몇 초 남았을까?</div>
+            </div>
+        </a>
+
+        <a href="sale.html" class="card">
+            <div class="icon">🏷️💸</div>
+            <div class="text-group">
+                <div class="title">할인율 계산기</div>
+                <div class="subtitle">이거 사면 얼마 이득인지 바로 확인</div>
+            </div>
+        </a>
+
+        <div class="card" style="opacity: 0.5; cursor: default;">
+            <div class="icon">🔒</div>
+            <div class="text-group">
+                <div class="title">Coming Soon</div>
+                <div class="subtitle">다음에 추가될 기능은?</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        © 2025 OneTool Lab. <br>
+        <a href="https://www.threads.net/" target="_blank">Instagram / Threads</a>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>할인율 계산기</title>
+    <style>
+        :root { --bg: #101010; --card: #1e1e1e; --text: #ffffff; --accent: #0095f6; --gray: #888; --save: #4caf50; }
+        body { margin: 0; padding: 20px; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .container { width: 100%; max-width: 400px; }
+        h1 { font-size: 20px; text-align: center; margin-bottom: 40px; color: var(--gray); font-weight: normal; }
+        
+        .result-box { text-align: center; margin-bottom: 40px; }
+        .final-price { font-size: 48px; font-weight: 800; margin-bottom: 10px; }
+        .final-price span { font-size: 20px; font-weight: 600; color: var(--gray); }
+        .saved-amount { color: var(--accent); font-size: 16px; font-weight: 600; background: rgba(0, 149, 246, 0.1); padding: 8px 16px; border-radius: 20px; display: inline-block; }
+
+        .input-wrapper { display: flex; gap: 15px; margin-bottom: 20px; }
+        .input-group { flex: 1; background: var(--card); padding: 15px; border-radius: 12px; border: 1px solid #333; transition: 0.2s; }
+        .input-group:focus-within { border-color: var(--accent); }
+        .input-group label { display: block; font-size: 13px; color: var(--gray); margin-bottom: 8px; }
+        .input-group input { width: 100%; background: transparent; border: none; color: white; font-size: 20px; font-weight: 600; outline: none; padding: 0; }
+        
+        /* 스피너 제거 */
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        
+        .presets { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; margin-top: 10px; }
+        .chip { background: #333; color: white; border: none; padding: 8px 16px; border-radius: 20px; white-space: nowrap; font-size: 14px; cursor: pointer; }
+        .chip:active { background: var(--accent); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>할인율 계산기</h1>
+
+        <div class="result-box">
+            <div class="final-price" id="final">0<span>원</span></div>
+            <div class="saved-amount" id="saved">0원 아꼈어요!</div>
+        </div>
+
+        <div class="input-wrapper">
+            <div class="input-group" style="flex: 2;">
+                <label>원래 가격</label>
+                <input type="number" id="price" placeholder="0" inputmode="numeric">
+            </div>
+            <div class="input-group" style="flex: 1;">
+                <label>할인율 (%)</label>
+                <input type="number" id="rate" placeholder="0" inputmode="numeric">
+            </div>
+        </div>
+
+        <div class="presets">
+            <button class="chip" onclick="setRate(10)">10%</button>
+            <button class="chip" onclick="setRate(20)">20%</button>
+            <button class="chip" onclick="setRate(30)">30%</button>
+            <button class="chip" onclick="setRate(50)">50%</button>
+            <button class="chip" onclick="setRate(70)">70%</button>
+        </div>
+    </div>
+
+    <script>
+        const priceInput = document.getElementById('price');
+        const rateInput = document.getElementById('rate');
+        const finalEl = document.getElementById('final');
+        const savedEl = document.getElementById('saved');
+
+        function formatNumber(num) {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+
+        function calculate() {
+            const price = parseFloat(priceInput.value) || 0;
+            const rate = parseFloat(rateInput.value) || 0;
+
+            const saved = price * (rate / 100);
+            const final = price - saved;
+
+            finalEl.innerHTML = `${formatNumber(Math.floor(final))}<span>원</span>`;
+            savedEl.innerText = `${formatNumber(Math.floor(saved))}원 아꼈어요!`;
+        }
+
+        function setRate(val) {
+            rateInput.value = val;
+            calculate();
+        }
+
+        priceInput.addEventListener('input', calculate);
+        rateInput.addEventListener('input', calculate);
+    </script>
+</body>
+</html>
