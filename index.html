@@ -7,41 +7,37 @@
     <style>
         :root { --bg: #0f0f11; --card-bg: rgba(30, 30, 30, 0.6); --text: #ffffff; --sub: #a0a0a0; --accent: linear-gradient(135deg, #0095f6, #9c27b0); --border: rgba(255, 255, 255, 0.1); }
         body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Pretendard", Roboto, sans-serif; min-height: 100vh; display: flex; flex-direction: column; align-items: center; overflow-x: hidden; }
-
-        /* 배경 데코레이션 */
         .bg-glow { position: fixed; top: -20%; left: -20%; width: 600px; height: 600px; background: radial-gradient(circle, rgba(0, 149, 246, 0.15), transparent 70%); z-index: -1; pointer-events: none; }
-        
         .container { width: 100%; max-width: 500px; padding: 20px; box-sizing: border-box; display: flex; flex-direction: column; flex: 1; }
-
-        /* 헤더 영역 */
+        
         .header { margin-top: 40px; margin-bottom: 40px; text-align: left; animation: fadeIn 0.8s ease-out; }
         .brand { font-size: 14px; color: var(--sub); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
         .logo { font-size: 32px; font-weight: 800; margin: 0; line-height: 1.2; background: var(--accent); -webkit-background-clip: text; -webkit-text-fill-color: transparent; display: inline-block; }
         .desc { margin-top: 10px; color: var(--sub); font-size: 15px; line-height: 1.5; }
 
-        /* 그리드 레이아웃 */
         .grid { display: grid; grid-template-columns: 1fr; gap: 16px; width: 100%; }
         
-        /* 카드 디자인 */
         .card { background: var(--card-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid var(--border); border-radius: 20px; padding: 24px; text-decoration: none; color: inherit; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); display: flex; align-items: center; position: relative; overflow: hidden; animation: slideUp 0.6s ease-out both; }
         .card:hover { transform: translateY(-4px); border-color: rgba(255, 255, 255, 0.3); background: rgba(40, 40, 40, 0.8); }
         .card:active { transform: scale(0.98); }
         
-        /* 딜레이 애니메이션 */
+        /* 인스타 카드 특별 효과 */
+        .card.insta { border-color: rgba(193, 53, 132, 0.3); }
+        .card.insta .icon-box { background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); color: white; }
+
         .card:nth-child(1) { animation-delay: 0.1s; }
         .card:nth-child(2) { animation-delay: 0.2s; }
         .card:nth-child(3) { animation-delay: 0.3s; }
 
         .icon-box { width: 50px; height: 50px; background: rgba(255, 255, 255, 0.05); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-right: 20px; flex-shrink: 0; }
         .text-group { flex: 1; }
-        .title { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+        .title { font-size: 18px; font-weight: 700; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+        .badge { font-size: 10px; background: #ed4956; color: white; padding: 2px 6px; border-radius: 4px; font-weight: 800; }
         .subtitle { font-size: 13px; color: var(--sub); }
         .arrow { font-size: 18px; color: var(--sub); opacity: 0.5; }
 
-        /* 푸터 */
         .footer { margin-top: auto; padding: 40px 0; text-align: center; color: rgba(255, 255, 255, 0.2); font-size: 12px; }
         
-        /* 애니메이션 키프레임 */
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
@@ -57,6 +53,15 @@
         </header>
 
         <div class="grid">
+            <a href="insta.html" class="card insta">
+                <div class="icon-box">📸</div>
+                <div class="text-group">
+                    <div class="title">인스타 맞팔 판독기 <span class="badge">HOT</span></div>
+                    <div class="subtitle">누가 팔로우 끊었는지 3초 만에 확인</div>
+                </div>
+                <div class="arrow">›</div>
+            </a>
+
             <a href="timer.html" class="card">
                 <div class="icon-box">🏃</div>
                 <div class="text-group">
@@ -74,14 +79,6 @@
                 </div>
                 <div class="arrow">›</div>
             </a>
-
-            <div class="card" style="opacity: 0.6;">
-                <div class="icon-box">🔒</div>
-                <div class="text-group">
-                    <div class="title">Coming Soon</div>
-                    <div class="subtitle">다음에 추가될 기능은?</div>
-                </div>
-            </div>
         </div>
 
         <footer class="footer">
