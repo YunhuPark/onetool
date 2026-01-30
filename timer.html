@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>칼퇴 계산기</title>
+    <style>
+        :root { --bg: #101010; --card: #1e1e1e; --text: #ffffff; --accent: #0095f6; --gray: #888; }
+        body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; overflow: hidden; position: relative; }
+        .container { width: 90%; max-width: 400px; padding: 20px; text-align: center; }
+        h1 { font-size: 24px; margin-bottom: 30px; font-weight: 700; }
+        .time-display { font-size: 56px; font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: -1px; margin: 20px 0; line-height: 1; }
+        .sub-text { color: var(--gray); font-size: 14px; margin-bottom: 5px; }
+        .progress-container { width: 100%; height: 8px; background: #333; border-radius: 4px; overflow: hidden; margin: 30px 0; }
+        .progress-bar { height: 100%; background: var(--accent); width: 0%; transition: width 1s linear; }
+        .inputs { display: flex; gap: 10px; justify-content: center; margin-top: 40px; }
+        .input-group { text-align: left; }
+        .input-group label { display: block; font-size: 12px; color: var(--gray); margin-bottom: 4px; }
+        input[type="time"] { background: var(--card); border: 1px solid #333; color: white; padding: 10px; border-radius: 8px; font-size: 16px; outline: none; }
+        input[type="time"]:focus { border-color: var(--accent); }
+        .hidden { display: none; }
+        .celebration { color: var(--accent); font-size: 24px; animation: pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes pop { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+
+        /* 뒤로가기 버튼 스타일 */
+        .back-btn { position: absolute; top: 20px; left: 20px; text-decoration: none; font-size: 20px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.1); border-radius: 50%; color: white; border: 1px solid rgba(255,255,255,0.1); z-index: 100; }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-btn">←</a>
+
+    <div class="container">
+        <h1>오늘도 고생하셨습니다 🔥</h1>
+        
+        <div id="working-view">
+            <div class="sub-text">퇴근까지 남은 시간</div>
+            <div class="time-display" id="countdown">00:00:00</div>
+            
+            <div class="progress-container">
+                <div class="progress-bar" id="progress"></div>
+            </div>
+            <div class="sub-text" id="percent-text" style="text-align: right; font-size: 12px;">0%</div>
+        </div>
+
+        <div id="done-view" class="hidden">
+            <div class="celebration">칼퇴하세요! 🏃💨</div>
+            <p class="sub-text">오늘 하루도 수고 많으셨어요.</p>
+        </div>
+
+        <div class="inputs">
+            <div class="input-group">
+                <label>출근 시간</label>
+                <input type="time" id="start-time" value="09:00">
+            </div>
+            <div class="input-group">
+                <label>퇴근 시간</label>
+                <input type="time" id="end-time" value="18:00">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const startInput = document.getElementById('start-time');
+        const endInput = document.getElementById('end-time');
+        const countdownEl = document.getElementById('countdown');
+        const progressEl = document.getElementById('progress');
+        const percentText = document.getElementById('percent-text');
+        const workingView = document.getElementById('working-view');
+        const doneView = document.getElementById('done-view');
+
+        if(localStorage.getItem('startTime')) startInput.value = localStorage.getItem('startTime');
+        if(localStorage.getItem('endTime')) endInput.value = localStorage.getItem('endTime');
+
+        function updateTimer() {
+            const now = new Date();
+            const start = new Date();
+            const end = new Date();
+            
+            const [sH, sM] = startInput.value.split(':');
+            const [eH, eM] = endInput.value.split(':');
+
+            start.setHours(sH, sM, 0);
+            end.setHours(eH, eM, 0);
+
+            localStorage.setItem('startTime', startInput.value);
+            localStorage.setItem('endTime', endInput.value);
+
+            const totalSeconds = (end - start) / 1000;
+            const remainingSeconds = (end - now) / 1000;
+
+            if (remainingSeconds <= 0) {
+                workingView.classList.add('hidden');
+                doneView.classList.remove('hidden');
+                return;
+            }
+
+            workingView.classList.remove('hidden');
+            doneView.classList.add('hidden');
+
+            const h = Math.floor(remainingSeconds / 3600);
+            const m = Math.floor((remainingSeconds % 3600) / 60);
+            const s = Math.floor(remainingSeconds % 60);
+            countdownEl.textContent = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+
+            const percent = 100 - (remainingSeconds / totalSeconds * 100);
+            const cleanPercent = Math.max(0, Math.min(100, percent)).toFixed(1);
+            progressEl.style.width = `${cleanPercent}%`;
+            percentText.textContent = `${cleanPercent}% 지남`;
+        }
+
+        startInput.addEventListener('change', updateTimer);
+        endInput.addEventListener('change', updateTimer);
+        
+        setInterval(updateTimer, 1000);
+        updateTimer();
+    </script>
+</body>
+</html>

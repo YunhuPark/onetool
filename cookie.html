@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>두쫀쿠 오픈런 생존 테스트 | OneTool</title>
+    <style>
+        /* OneTool 다크모드 테마 적용 */
+        :root { --bg: #0f0f11; --card: #1e1e1e; --text: #ffffff; --sub: #a0a0a0; --accent: #ff6b6b; --border: #333; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Pretendard", Roboto, sans-serif;
+            margin: 0; padding: 20px;
+            background-color: var(--bg); color: var(--text);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            min-height: 100vh; position: relative;
+        }
+
+        /* 뒤로가기 버튼 */
+        .back-btn { position: absolute; top: 20px; left: 20px; text-decoration: none; font-size: 20px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.1); border-radius: 50%; color: white; border: 1px solid rgba(255,255,255,0.1); z-index: 100; cursor: pointer; }
+
+        .container {
+            background-color: var(--card);
+            width: 100%; max-width: 500px;
+            padding: 40px 20px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        h1 { font-size: 28px; margin-bottom: 10px; line-height: 1.3; }
+        h1 span { color: var(--accent); }
+        .desc { color: var(--sub); margin-bottom: 40px; font-size: 15px; line-height: 1.6; }
+        .hidden { display: none; }
+
+        /* 프로그래스 바 */
+        .progress-bar { width: 100%; height: 6px; background-color: #333; border-radius: 10px; margin-bottom: 30px; overflow: hidden; }
+        .progress-fill { height: 100%; background-color: var(--accent); width: 0%; transition: width 0.3s ease; }
+
+        /* 질문 및 답변 */
+        .question-text { font-size: 20px; font-weight: 700; margin-bottom: 30px; line-height: 1.4; word-break: keep-all; }
+
+        .answer-btn {
+            display: block; width: 100%; padding: 16px; margin-bottom: 12px;
+            border: 1px solid var(--border); border-radius: 12px;
+            background-color: #2a2a2a; color: #fff;
+            font-size: 15px; cursor: pointer; transition: all 0.2s; text-align: left;
+        }
+        .answer-btn:hover, .answer-btn:active { background-color: var(--accent); border-color: var(--accent); color: white; font-weight: bold; }
+
+        /* 결과 화면 */
+        .result-title { font-size: 24px; margin-bottom: 10px; margin-top: 20px; font-weight: 800; }
+        .result-desc { font-size: 16px; line-height: 1.6; color: #ccc; margin-bottom: 30px; word-break: keep-all; }
+        
+        .score-board {
+            background-color: #252525; padding: 20px; border-radius: 12px;
+            margin-bottom: 25px; text-align: left; font-size: 14px; color: #ddd; line-height: 1.8;
+        }
+
+        /* 버튼 스타일 */
+        .action-btn {
+            background-color: var(--accent); color: white; border: none;
+            padding: 16px; border-radius: 12px; font-size: 16px;
+            cursor: pointer; width: 100%; margin-bottom: 10px; font-weight: bold;
+        }
+        .home-btn { background-color: #333; color: #aaa; }
+
+        /* 로딩 애니메이션 */
+        .loading-spinner {
+            border: 4px solid #333; border-top: 4px solid var(--accent);
+            border-radius: 50%; width: 40px; height: 40px;
+            animation: spin 1s linear infinite; margin: 40px auto;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <a href="index.html" class="back-btn">←</a>
+
+    <div class="container">
+        <div id="start-screen">
+            <div style="font-size: 60px; margin-bottom: 20px;">🍪</div>
+            <h1>두쫀쿠 오픈런<br><span>생존 테스트</span></h1>
+            <p class="desc">전국민 수강신청급 난이도!<br>당신은 과연 쿠키를 손에 넣을 수 있을까요?</p>
+            <button class="action-btn" onclick="startTest()">오픈런 도전하기</button>
+        </div>
+
+        <div id="test-screen" class="hidden">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress"></div>
+            </div>
+            <div id="question" class="question-text">질문 로딩중...</div>
+            <div id="answers"></div>
+        </div>
+
+        <div id="loading-screen" class="hidden">
+            <div class="loading-spinner"></div>
+            <h2>결과를 굽는 중...</h2>
+            <p class="desc">오븐 앞에서 기다리는 중입니다.</p>
+        </div>
+
+        <div id="result-screen" class="hidden">
+            <div id="result-icon" style="font-size: 50px;">🎉</div>
+            <h2 id="result-title" class="result-title">결과 제목</h2>
+            <p id="result-desc" class="result-desc">결과 설명</p>
+            
+            <div class="score-board" id="score-board"></div>
+
+            <button class="action-btn" onclick="location.reload()">다시 하기</button>
+            <button class="action-btn home-btn" onclick="location.href='index.html'">다른 도구 더보기</button>
+        </div>
+    </div>
+
+    <script>
+        // --- 🌶️ 매운맛 대본 (6문항) ---
+        const questions = [
+            {
+                id: 1,
+                q: "오전 5시 기상! 백화점 오픈까지 5시간 남았다. 당신의 'OOTD(복장)'는?",
+                a: [
+                    { text: "추리닝 + 롱패딩 + 캠핑의자 (생존 전문가)", type: "stamina", score: 3 },
+                    { text: "인생샷 찍어야 하니까 '풀메이크업' 장착", type: "info", score: 1 },
+                    { text: "택시비 따위 신경 안 쓴다. 일단 씻고 택시 호출.", type: "money", score: 2 }
+                ]
+            },
+            {
+                id: 2,
+                q: "현장 도착. 내 앞에 50명 있다. 근데 갑자기 '배'가 아파온다. 당신은?",
+                a: [
+                    { text: "인간의 존엄성 포기. 괄약근에 모든 힘을 집중한다.", type: "stamina", score: 3 },
+                    { text: "뒷사람에게 '제 자리 좀...' 읍소하고 뛰어간다.", type: "luck", score: 2 },
+                    { text: "친구에게 알바비 줄 테니까 지금 나오라고 전화한다.", type: "money", score: 3 }
+                ]
+            },
+            {
+                id: 3,
+                q: "줄 서 있는데 어떤 아줌마가 '일행 있다'며 슬쩍 끼어든다. 당신의 반응은?",
+                a: [
+                    { text: "(속으로 욕하며) 눈으로 레이저를 쏜다.", type: "luck", score: 1 },
+                    { text: "저기요. 뒤로 가시죠? (정의의 사도)", type: "stamina", score: 2 },
+                    { text: "직원에게 '여기 새치기요!' 크게 고자질한다.", type: "info", score: 3 }
+                ]
+            },
+            {
+                id: 4,
+                q: "직원이 외친다. '피스타치오 맛 품절 임박입니다!!' (술렁술렁)",
+                a: [
+                    { text: "안 돼!!! 다른 맛이라도 싹쓸이할 계획을 세운다.", type: "money", score: 2 },
+                    { text: "트위터/당근마켓 실시간 검색해서 리셀러 찾는다.", type: "info", score: 3 },
+                    { text: "아닐 거야... 내 운을 믿고 끝까지 기다린다.", type: "luck", score: 3 }
+                ]
+            },
+            {
+                id: 5,
+                q: "앞사람이 나한테 귓속말을 한다. '제 번호표 5만원에 사실래요?'",
+                a: [
+                    { text: "5만원? 계좌 불러요. (금융치료)", type: "money", score: 3 },
+                    { text: "됐거든요? 신고하기 전에 꺼지세요.", type: "stamina", score: 2 },
+                    { text: "3만원에 쿨거 되나요? (네고 시도)", type: "info", score: 2 }
+                ]
+            },
+            {
+                id: 6,
+                q: "드디어 내 차례! 근데 쿠키가 '살짝 찌그러진 것' 하나 남았다.",
+                a: [
+                    { text: "뱃속에 들어가면 다 똑같아. 산다.", type: "stamina", score: 2 },
+                    { text: "인스타 감성 파괴됨. 안 사고 집에 간다.", type: "info", score: 1 },
+                    { text: "사장님, 이거 B급이니까 깎아주세요.", type: "money", score: 2 }
+                ]
+            }
+        ];
+
+        const results = {
+            money: { 
+                title: "SSS급 [두바이 석유왕]", 
+                desc: "줄 서는 시간도 돈이다! 압도적인 자본력으로 해결하는 타입. 결국 웃돈 주고 사먹을 운명입니다.", 
+                color: "#FFD700",
+                icon: "💰"
+            },
+            info: { 
+                title: "A급 [AI 전략가]", 
+                desc: "재고 파악, 동선 체크, 새치기 방어까지! 철저한 데이터 분석으로 실패 확률 0%에 도전합니다.", 
+                color: "#4682B4",
+                icon: "🧠"
+            },
+            stamina: { 
+                title: "B급 [존버의 신]", 
+                desc: "비바람이 몰아쳐도 텐트 치고 버티는 집념의 한국인! 당신의 튼튼한 다리가 최고의 무기입니다.", 
+                color: "#CD853F",
+                icon: "💪"
+            },
+            luck: { 
+                title: "C급 [운빨 로맨스]", 
+                desc: "전략은 없다. 오직 '감'과 '하늘의 뜻'에 맡깁니다. 빈손으로 돌아갈 확률 99%...", 
+                color: "#FF69B4",
+                icon: "🍀"
+            }
+        };
+
+        let currentStep = 0;
+        let scores = { money: 0, info: 0, stamina: 0, luck: 0 };
+
+        function startTest() {
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('test-screen').classList.remove('hidden');
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            const q = questions[currentStep];
+            const progress = ((currentStep + 1) / questions.length) * 100;
+            document.getElementById('progress').style.width = `${progress}%`;
+            
+            document.getElementById('question').innerText = `Q${currentStep + 1}. ${q.q}`;
+            
+            const answersDiv = document.getElementById('answers');
+            answersDiv.innerHTML = '';
+            
+            q.a.forEach(answer => {
+                const btn = document.createElement('button');
+                btn.className = 'answer-btn';
+                btn.innerText = answer.text;
+                btn.onclick = () => handleAnswer(answer.type, answer.score);
+                answersDiv.appendChild(btn);
+            });
+        }
+
+        function handleAnswer(type, score) {
+            scores[type] += score;
+            if (currentStep < questions.length - 1) {
+                currentStep++;
+                renderQuestion();
+            } else {
+                showLoading();
+            }
+        }
+
+        function showLoading() {
+            document.getElementById('test-screen').classList.add('hidden');
+            document.getElementById('loading-screen').classList.remove('hidden');
+            setTimeout(() => {
+                document.getElementById('loading-screen').classList.add('hidden');
+                showResult();
+            }, 2000);
+        }
+
+        function showResult() {
+            document.getElementById('result-screen').classList.remove('hidden');
+            
+            const maxType = Object.keys(scores).reduce((a, b) => scores[a] >= scores[b] ? a : b);
+            const result = results[maxType];
+
+            document.getElementById('result-icon').innerText = result.icon;
+            const titleEl = document.getElementById('result-title');
+            titleEl.innerText = result.title;
+            titleEl.style.color = result.color;
+            
+            document.getElementById('result-desc').innerText = result.desc;
+
+            document.getElementById('score-board').innerHTML = `
+                💰 자본력: ${scores.money}점<br>
+                🧠 정보력: ${scores.info}점<br>
+                💪 체력: ${scores.stamina}점<br>
+                🍀 운: ${scores.luck}점
+            `;
+        }
+    </script>
+</body>
+</html>
