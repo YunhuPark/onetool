@@ -23,8 +23,9 @@
 ### 🔥 1. 인스타 맞팔 판독기 (Insta Checker)
 > "누가 내 팔로우를 몰래 끊었을까?"
 - **Privacy First:** 서버 전송 없이 브라우저에서 100% 로컬 처리 (해킹 위험 0%)
-- **ZIP Support:** 인스타그램 데이터 다운로드 파일(ZIP)을 압축 풀지 않고 바로 업로드 가능
-- **Smart Analysis:** 맞팔이 아닌 유저 목록 추출 및 프로필 바로가기 링크 제공
+- **ZIP Support:** 인스타그램 데이터 다운로드 파일(ZIP/JSON) 지원
+- **Smart Analysis:** 나를 언팔로우한 사람과 나만 팔로우하는 '팬' 목록 추출 분리 제공
+- **Features:** 오름차순/내림차순 정렬, 실시간 검색, 원클릭 복사, 샘플 데이터 체험 기능 제공
 
 ### 🍪 2. 두쫀쿠 오픈런 생존 테스트 (Survival Test)
 > "내 오픈런 성공 확률은 몇 %일까?"
@@ -71,7 +72,7 @@
 
 ```bash
 # 1. 저장소 클론
-git clone [https://github.com/your-username/onetool.git](https://github.com/your-username/onetool.git)
+git clone https://github.com/YunhuPark/onetool.git
 
 # 2. 폴더 이동
 cd onetool

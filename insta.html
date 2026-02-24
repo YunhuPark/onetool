@@ -1,78 +1,562 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>인스타 맞팔 판독기</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <style>
-        :root { --bg: #101010; --card: #1e1e1e; --text: #ffffff; --sub: #888; --border: #333; --accent: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); --danger: #ed4956; --success: #0095f6; }
-        
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background-color: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 20px; position: relative; }
+        :root {
+            --bg: #101010;
+            --card: #1e1e1e;
+            --text: #ffffff;
+            --sub: #888;
+            --border: #333;
+            --accent: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+            --danger: #ed4956;
+            --success: #0095f6;
+        }
 
-        .container { width: 100%; max-width: 500px; padding-bottom: 40px; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-        header { text-align: center; margin: 40px 0 30px; }
-        h2 { font-size: 24px; font-weight: 800; margin-bottom: 10px; background: var(--accent); -webkit-background-clip: text; -webkit-text-fill-color: transparent; display: inline-block; }
-        .safety-badge { display: inline-block; background: rgba(0, 149, 246, 0.15); color: #0095f6; font-size: 12px; font-weight: bold; padding: 6px 12px; border-radius: 20px; margin-bottom: 15px; border: 1px solid rgba(0, 149, 246, 0.3); }
-        .desc { color: var(--sub); font-size: 14px; line-height: 1.6; }
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            padding-bottom: 40px;
+        }
+
+        header {
+            text-align: center;
+            margin: 40px 0 30px;
+        }
+
+        h2 {
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 10px;
+            background: var(--accent);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: inline-block;
+        }
+
+        .safety-badge {
+            display: inline-block;
+            background: rgba(0, 149, 246, 0.15);
+            color: #0095f6;
+            font-size: 12px;
+            font-weight: bold;
+            padding: 6px 12px;
+            border-radius: 20px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(0, 149, 246, 0.3);
+        }
+
+        .desc {
+            color: var(--sub);
+            font-size: 14px;
+            line-height: 1.6;
+        }
 
         /* 가이드 (아코디언) */
-        details { background: var(--card); border-radius: 12px; padding: 15px; margin-bottom: 25px; border: 1px solid var(--border); cursor: pointer; transition: 0.2s; }
-        details[open] { border-color: #666; }
-        summary { font-weight: bold; color: #fff; outline: none; font-size: 15px; list-style: none; display: flex; justify-content: space-between; align-items: center; }
-        summary::after { content: '+'; font-size: 18px; color: var(--sub); }
-        details[open] summary::after { content: '-'; }
-        .guide-steps { margin-top: 15px; font-size: 13px; color: #ccc; padding-left: 20px; line-height: 1.8; }
-        .highlight { color: #f09433; font-weight: bold; }
+        details {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 25px;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        details[open] {
+            border-color: #666;
+        }
+
+        summary {
+            font-weight: bold;
+            color: #fff;
+            outline: none;
+            font-size: 15px;
+            list-style: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        summary::after {
+            content: '+';
+            font-size: 18px;
+            color: var(--sub);
+        }
+
+        details[open] summary::after {
+            content: '-';
+        }
+
+        .guide-steps {
+            margin-top: 15px;
+            font-size: 12.5px;
+            color: #dddddd;
+            padding-left: 20px;
+            line-height: 1.6;
+            letter-spacing: -0.3px;
+        }
+
+        .guide-steps li {
+            margin-bottom: 6px;
+            padding-left: 2px;
+        }
+
+        .guide-steps li::marker {
+            color: var(--success);
+            font-weight: bold;
+        }
+
+        .guide-steps li:last-child {
+            margin-bottom: 0;
+        }
+
+        .step-notice {
+            margin-top: 8px;
+            margin-bottom: 8px;
+            padding: 8px 10px;
+            background: rgba(237, 73, 86, 0.08);
+            border-left: 3px solid var(--danger);
+            border-radius: 6px;
+            color: #ffb3b8;
+            font-size: 11.5px;
+            line-height: 1.5;
+            letter-spacing: -0.3px;
+        }
+
+        .step-notice.info {
+            background: rgba(0, 149, 246, 0.08);
+            border-left-color: var(--success);
+            color: #99d5ff;
+        }
+
+        .step-notice strong {
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        .step-notice .sub-text {
+            color: #aaaaaa;
+            font-size: 10.5px;
+            margin-top: 2px;
+            display: block;
+        }
+
+        .highlight {
+            color: #f09433;
+            font-weight: bold;
+            background: rgba(240, 148, 51, 0.1);
+            padding: 2px 5px;
+            border-radius: 4px;
+        }
+
+        /* 정보 박스 (FAQ) */
+        .info-box {
+            margin-top: 15px;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 10px;
+            font-size: 12px;
+            color: #aaaaaa;
+            line-height: 1.6;
+            letter-spacing: -0.3px;
+        }
+
+        .info-box strong {
+            display: block;
+            color: #ffffff;
+            margin-bottom: 6px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .info-box p {
+            margin-bottom: 8px;
+        }
+
+        .info-box p:last-child {
+            margin-bottom: 0;
+        }
+
+        .info-box b {
+            color: #dddddd;
+        }
 
         /* 파일 업로드 */
-        .upload-group { margin-bottom: 15px; }
-        .custom-file-upload { display: flex; align-items: center; width: 100%; padding: 18px; border: 2px dashed var(--border); border-radius: 16px; cursor: pointer; transition: all 0.3s; background: rgba(255,255,255,0.03); color: var(--sub); font-size: 14px; }
-        .custom-file-upload:hover { border-color: #666; background: rgba(255,255,255,0.08); }
-        .custom-file-upload.uploaded { border-style: solid; border-color: var(--success); color: #fff; background: rgba(0, 149, 246, 0.2); }
-        .upload-icon { margin-right: 12px; font-size: 20px; }
-        .file-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; }
-        input[type="file"] { display: none; }
+        .upload-group {
+            margin-bottom: 15px;
+        }
+
+        .custom-file-upload {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            padding: 18px;
+            border: 2px dashed var(--border);
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--sub);
+            font-size: 14px;
+        }
+
+        .custom-file-upload:hover {
+            border-color: #666;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .custom-file-upload.uploaded {
+            border-style: solid;
+            border-color: var(--success);
+            color: #fff;
+            background: rgba(0, 149, 246, 0.2);
+        }
+
+        .upload-icon {
+            margin-right: 12px;
+            font-size: 20px;
+        }
+
+        .file-name {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex: 1;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
 
         /* 분석 버튼 */
-        .analyze-btn { width: 100%; padding: 18px; background: var(--accent); color: white; border: none; border-radius: 16px; font-size: 16px; font-weight: 800; cursor: pointer; transition: transform 0.2s; margin-top: 10px; box-shadow: 0 4px 20px rgba(220, 39, 67, 0.4); }
-        .analyze-btn:active { transform: scale(0.98); }
-        .analyze-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .analyze-btn {
+            width: 100%;
+            padding: 18px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            font-size: 16px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: transform 0.2s;
+            margin-top: 10px;
+            box-shadow: 0 4px 20px rgba(220, 39, 67, 0.4);
+        }
+
+        .analyze-btn:active {
+            transform: scale(0.98);
+        }
+
+        .analyze-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
 
         /* 결과 영역 */
-        #result { margin-top: 40px; display: none; animation: fadeIn 0.5s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        .summary-box { background: var(--card); border-radius: 20px; padding: 25px; border: 1px solid var(--border); margin-bottom: 30px; }
-        .stat-row { display: flex; justify-content: space-around; text-align: center; }
-        .stat-item span { display: block; font-size: 13px; color: var(--sub); margin-bottom: 8px; }
-        .stat-item strong { display: block; font-size: 24px; color: #fff; font-weight: 700; }
-        
-        .disclaimer { font-size: 12px; color: var(--border); margin-top: 20px; text-align: center; line-height: 1.4; }
-        .result-title { font-size: 18px; font-weight: 700; color: var(--danger); margin-bottom: 20px; text-align: center; }
-        
+        #result {
+            margin-top: 40px;
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 탭 및 버튼 기능 디자인 */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 6px;
+            border-radius: 12px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            background: transparent;
+            color: var(--sub);
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            background: var(--card);
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .demo-btn {
+            width: 100%;
+            padding: 14px;
+            background: rgba(255, 255, 255, 0.05);
+            color: #aaaaaa;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            font-size: 13.5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 10px;
+        }
+
+        .demo-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        .reset-btn {
+            width: 100%;
+            padding: 16px;
+            background: transparent;
+            color: var(--sub);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 25px;
+        }
+
+        .reset-btn:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+        }
+
+        .sort-btn {
+            padding: 0 15px;
+            background: #2a2a2a;
+            color: white;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            transition: background 0.2s;
+        }
+
+        .sort-btn:hover {
+            background: #3a3a3a;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s linear infinite;
+            vertical-align: middle;
+            margin-right: 8px;
+            margin-top: -2px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .summary-box {
+            background: var(--card);
+            border-radius: 20px;
+            padding: 25px;
+            border: 1px solid var(--border);
+            margin-bottom: 30px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            text-align: center;
+        }
+
+        .stat-item {
+            flex: 1;
+        }
+
+        .stat-item span {
+            display: block;
+            font-size: 13px;
+            color: var(--sub);
+            margin-bottom: 8px;
+        }
+
+        .stat-item strong {
+            display: block;
+            font-size: 24px;
+            color: #fff;
+            font-weight: 700;
+        }
+
+        .disclaimer {
+            font-size: 12px;
+            color: var(--border);
+            margin-top: 20px;
+            text-align: center;
+            line-height: 1.4;
+        }
+
+        .result-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--danger);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
         /* 도구 */
-        .tools { display: flex; gap: 10px; margin-bottom: 15px; }
-        .search-input { flex: 1; padding: 12px; background: var(--card); border: 1px solid var(--border); border-radius: 10px; color: white; outline: none; }
-        .search-input:focus { border-color: #666; }
-        .copy-btn { padding: 0 20px; background: #333; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 13px; }
+        .tools {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 12px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: white;
+            outline: none;
+        }
+
+        .search-input:focus {
+            border-color: #666;
+        }
+
+        .copy-btn {
+            padding: 0 20px;
+            background: #333;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+        }
 
         /* 리스트 */
-        .user-list { max-height: 500px; overflow-y: auto; background: var(--card); border-radius: 16px; border: 1px solid var(--border); }
-        .user-item { display: flex; justify-content: space-between; align-items: center; padding: 16px; border-bottom: 1px solid #2a2a2a; }
-        .user-item:last-child { border-bottom: none; }
-        .user-info { display: flex; align-items: center; overflow: hidden; }
-        .user-avatar { width: 40px; height: 40px; background: #333; border-radius: 50%; margin-right: 15px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
-        .user-name { font-weight: 600; font-size: 15px; color: #fff; overflow: hidden; text-overflow: ellipsis; }
-        .action-btn { text-decoration: none; color: white; background: var(--success); font-size: 12px; font-weight: bold; padding: 8px 16px; border-radius: 20px; flex-shrink: 0; margin-left: 10px; }
-        
-        .ghost-alert { font-size: 13px; color: #ffadad; margin-top: 15px; background: rgba(237, 73, 86, 0.1); padding: 12px; border-radius: 10px; text-align: center; }
+        .user-list {
+            max-height: 500px;
+            overflow-y: auto;
+            background: var(--card);
+            border-radius: 16px;
+            border: 1px solid var(--border);
+        }
+
+        .user-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            border-bottom: 1px solid #2a2a2a;
+        }
+
+        .user-item:last-child {
+            border-bottom: none;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: #333;
+            border-radius: 50%;
+            margin-right: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 15px;
+            color: #fff;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .action-btn {
+            text-decoration: none;
+            color: white;
+            background: var(--success);
+            font-size: 12px;
+            font-weight: bold;
+            padding: 8px 16px;
+            border-radius: 20px;
+            flex-shrink: 0;
+            margin-left: 10px;
+        }
+
+        .ghost-alert {
+            font-size: 13px;
+            color: #ffadad;
+            margin-top: 15px;
+            background: rgba(237, 73, 86, 0.1);
+            padding: 12px;
+            border-radius: 10px;
+            text-align: center;
+        }
     </style>
 </head>
+
 <body>
-    <a href="index.html" style="position: absolute; top: 20px; left: 20px; text-decoration: none; font-size: 20px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.1); border-radius: 50%; color: white; border: 1px solid rgba(255,255,255,0.1); z-index: 100;">←</a>
+    <a href="index.html"
+        style="position: absolute; top: 20px; left: 20px; text-decoration: none; font-size: 20px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.1); border-radius: 50%; color: white; border: 1px solid rgba(255,255,255,0.1); z-index: 100;">←</a>
 
     <div class="container">
         <header>
@@ -86,11 +570,25 @@
             <summary>📂 데이터 다운로드 방법 (필독)</summary>
             <ol class="guide-steps">
                 <li>인스타 설정 → <strong>계정 센터</strong> → 내 정보 및 권한</li>
-                <li>내 정보 내보내기 → 정보 맞춤 설정 → <strong>'팔로워 및 팔로잉'</strong> 선택</li>
+                <li>내 정보 내보내기 → 내보내기 만들기 → 기기로 내보내기 → 정보 맞춤 설정<br>→ <strong>'팔로워 및
+                        팔로잉'</strong>만 선택</li>
                 <li>기간: <span class="highlight">전체 기간</span> (필수!)</li>
                 <li>형식: <span class="highlight">JSON</span> (필수!)</li>
-                <li>메일로 온 파일 다운로드 (압축 풀 필요 X)</li>
+                <li>
+                    <strong>5분 정도</strong> 기다렸다가 파일 다운로드<br>
+                    <span class="sub-text" style="color:#aaaaaa; font-size: 11.5px; padding-left: 2px;">(※ 팔로워/팔로잉 수가 많을
+                        경우 시간이 더 걸릴 수 있습니다.)</span>
+                    <div class="step-notice">
+                        🚫 <strong>압축은 절대 풀 필요가 없습니다! (ZIP 파일 그대로 사용)</strong><br>
+                        🌐 파일 업로드 오류 방지를 위해 꼭 <strong>기본 인터넷(사파리, 크롬)</strong>에서 진행해 주세요.
+                    </div>
+                </li>
             </ol>
+
+            <div class="info-box">
+                <strong>💡 앱에 뜨는 숫자랑 결과가 다른가요?</strong>
+                <p>앱에서는 숨겨지는 <b>'비활성화/정지/탈퇴 계정'</b>들이 원본 데이터(JSON)에는 그대로 남아있기 때문입니다. 오류가 아니니 안심하세요!</p>
+            </div>
         </details>
 
         <div class="upload-group">
@@ -109,29 +607,47 @@
             <input type="file" id="followersFile" accept=".json, .zip">
         </div>
 
+        <div class="step-notice info" style="margin-bottom: 20px; text-align: center;">
+            💡 <strong>다운받은 파일 1개를 양쪽 모두에 올려주세요!</strong><br>
+            <span class="sub-text">어느 쪽이든 같은 파일(ZIP 또는 JSON)을 넣으면 알아서 분석합니다.</span>
+        </div>
+
         <button class="analyze-btn" onclick="analyzeFiles()">🔍 판독 시작하기</button>
+        <button class="demo-btn" onclick="runDemo()">🎁 파일이 없나요? 샘플 데이터로 체험해보기</button>
 
         <div id="result">
             <div class="summary-box" id="summaryBox"></div>
-            <div class="result-title" id="resultTitle"></div>
-            
+
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab('unfollowers')" id="tab-unfollowers">😡 맞팔 안 한
+                    사람</button>
+                <button class="tab-btn" onclick="switchTab('fans')" id="tab-fans">😍 내가 맞팔 안 한 사람</button>
+            </div>
+
             <div class="tools">
                 <input type="text" id="searchInput" class="search-input" placeholder="아이디 검색..." onkeyup="filterList()">
+                <button class="sort-btn" onclick="toggleSort()">↕️ 정렬</button>
                 <button class="copy-btn" onclick="copyList()">📋 목록 복사</button>
             </div>
 
             <div class="user-list" id="userList"></div>
+
+            <button class="reset-btn" onclick="resetApp()">🔄 처음부터 다시 검사하기</button>
         </div>
     </div>
 
     <script>
         let globalUnfollowerList = [];
+        let globalFanList = [];
+        let currentList = [];
+        let currentTab = 'unfollowers';
+        let sortAsc = true;
         let debugFileNames = { following: [], followers: [] };
 
-        document.getElementById('followingFile').addEventListener('change', function(e) {
+        document.getElementById('followingFile').addEventListener('change', function (e) {
             updateLabel('label-following', 'text-following', e.target.files[0], 'following');
         });
-        document.getElementById('followersFile').addEventListener('change', function(e) {
+        document.getElementById('followersFile').addEventListener('change', function (e) {
             updateLabel('label-followers', 'text-followers', e.target.files[0], 'followers');
         });
 
@@ -157,8 +673,9 @@
                 return;
             }
 
-            btn.innerHTML = '데이터 분석 중... ⏳';
+            btn.innerHTML = '<div class="spinner"></div>데이터 분석 중...';
             btn.disabled = true;
+            document.querySelector('.demo-btn').style.display = 'none';
             document.getElementById('result').style.display = 'none';
             debugFileNames = { following: [], followers: [] };
 
@@ -174,10 +691,13 @@
                 if (followingList.length === 0) throw new Error("팔로잉 목록을 찾을 수 없습니다.");
                 if (followersList.length === 0) throw new Error("팔로워 목록을 찾을 수 없습니다.");
 
+                const followingSet = new Set(followingList);
                 const followersSet = new Set(followersList);
-                globalUnfollowerList = followingList.filter(user => !followersSet.has(user));
 
-                displayResult(globalUnfollowerList, followingList.length, followersList.length);
+                globalUnfollowerList = followingList.filter(user => !followersSet.has(user));
+                globalFanList = followersList.filter(user => !followingSet.has(user));
+
+                displayResult(globalUnfollowerList, globalFanList, followingList.length, followersList.length);
                 document.getElementById('result').style.display = 'block';
                 setTimeout(() => document.getElementById('result').scrollIntoView({ behavior: 'smooth' }), 100);
 
@@ -214,7 +734,7 @@
                 let targetFiles = [];
                 const regex = type === 'following' ? /following/i : /followers/i;
                 for (const [relativePath, zipEntry] of Object.entries(zip.files)) {
-                    const fileName = zipEntry.name.split('/').pop(); 
+                    const fileName = zipEntry.name.split('/').pop();
                     if (regex.test(fileName) && fileName.toLowerCase().endsWith('.json')) {
                         const content = await zipEntry.async("string");
                         targetFiles.push(content);
@@ -248,20 +768,43 @@
             return allUsers;
         }
 
-        function displayResult(list, followingCount, followersCount) {
+        function displayResult(unfollowerList, fanList, followingCount, followersCount) {
             const summaryBox = document.getElementById('summaryBox');
-            const resultTitle = document.getElementById('resultTitle');
 
             summaryBox.innerHTML = `
                 <div class="stat-row">
                     <div class="stat-item"><span>내가 팔로우</span><strong style="color:#0095f6">${followingCount}</strong></div>
                     <div class="stat-item"><span>나를 팔로우</span><strong>${followersCount}</strong></div>
-                    <div class="stat-item"><span>배신자(?)</span><strong style="color:#ed4956">${list.length}</strong></div>
+                </div>
+                <div class="stat-row" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid var(--border);">
+                    <div class="stat-item"><span>배신자(?)</span><strong style="color:#ed4956">${unfollowerList.length}</strong></div>
+                    <div class="stat-item"><span>내가 맞팔 안 한 사람</span><strong style="color:#f09433">${fanList.length}</strong></div>
                 </div>
                 ${followersCount < 10 && followingCount > 100 ? `<div class="ghost-alert">⚠️ 데이터가 이상합니다. '전체 기간'으로 다운받으셨나요?</div>` : ''}
             `;
-            resultTitle.innerText = `😡 맞팔 안 한 사람 (${list.length}명)`;
-            renderList(list);
+            switchTab('unfollowers');
+        }
+
+        function switchTab(tab) {
+            currentTab = tab;
+            document.getElementById('tab-unfollowers').classList.toggle('active', tab === 'unfollowers');
+            document.getElementById('tab-fans').classList.toggle('active', tab === 'fans');
+
+            document.getElementById('tab-unfollowers').innerText = `😡 맞팔 안 한 사람 (${globalUnfollowerList.length})`;
+            document.getElementById('tab-fans').innerText = `😍 내가 맞팔 안 한 사람 (${globalFanList.length})`;
+
+            currentList = tab === 'unfollowers' ? [...globalUnfollowerList] : [...globalFanList];
+            sortAsc = true;
+            document.getElementById('searchInput').value = '';
+            renderList(currentList);
+        }
+
+        function toggleSort() {
+            sortAsc = !sortAsc;
+            currentList.sort((a, b) => {
+                return sortAsc ? a.localeCompare(b) : b.localeCompare(a);
+            });
+            renderList(currentList);
         }
 
         function renderList(list) {
@@ -279,13 +822,53 @@
 
         function filterList() {
             const query = document.getElementById('searchInput').value.toLowerCase();
-            renderList(globalUnfollowerList.filter(user => user.toLowerCase().includes(query)));
+            const sourceList = currentTab === 'unfollowers' ? globalUnfollowerList : globalFanList;
+            currentList = sourceList.filter(user => user.toLowerCase().includes(query));
+            if (!sortAsc) currentList.reverse();
+            renderList(currentList);
         }
 
         function copyList() {
-            if (globalUnfollowerList.length === 0) return alert("복사할 목록이 없습니다.");
-            navigator.clipboard.writeText(globalUnfollowerList.join('\n')).then(() => alert("목록 복사 완료!"));
+            if (currentList.length === 0) return alert("복사할 목록이 없습니다.");
+            navigator.clipboard.writeText(currentList.join('\n')).then(() => alert("목록 복사 완료!"));
+        }
+
+        function resetApp() {
+            document.getElementById('followingFile').value = '';
+            document.getElementById('followersFile').value = '';
+            updateLabel('label-following', 'text-following', null, 'following');
+            updateLabel('label-followers', 'text-followers', null, 'followers');
+            document.getElementById('result').style.display = 'none';
+            document.querySelector('.demo-btn').style.display = 'block';
+            document.getElementById('searchInput').value = '';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function runDemo() {
+            const demoFollowing = ['cristiano', 'leomessi', 'therock', 'kendalljenner', 'justinbieber', 'arianagrande', 'beyonce', 'mrbeast'];
+            const demoFollowers = ['cristiano', 'therock', 'justinbieber', 'realmadrid', 'fcbarcelona', 'taylorswift', 'mrbeast', 'nba'];
+
+            const btn = document.querySelector('.analyze-btn');
+            btn.innerHTML = '<div class="spinner"></div>샘플 데이터 분석 중...';
+            btn.disabled = true;
+            document.querySelector('.demo-btn').style.display = 'none';
+            document.getElementById('result').style.display = 'none';
+
+            setTimeout(() => {
+                const followingSet = new Set(demoFollowing);
+                const followersSet = new Set(demoFollowers);
+                globalUnfollowerList = demoFollowing.filter(user => !followersSet.has(user));
+                globalFanList = demoFollowers.filter(user => !followingSet.has(user));
+
+                displayResult(globalUnfollowerList, globalFanList, demoFollowing.length, demoFollowers.length);
+                document.getElementById('result').style.display = 'block';
+                setTimeout(() => document.getElementById('result').scrollIntoView({ behavior: 'smooth' }), 100);
+
+                btn.innerHTML = '🔍 판독 시작하기';
+                btn.disabled = false;
+            }, 1200);
         }
     </script>
 </body>
+
 </html>
