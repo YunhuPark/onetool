@@ -488,6 +488,15 @@
             border-bottom: none;
         }
 
+        .user-checkbox {
+            margin-right: 12px;
+            width: 18px;
+            height: 18px;
+            accent-color: #f09433;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
         .user-info {
             display: flex;
             align-items: center;
@@ -611,7 +620,8 @@
             <div class="tools">
                 <input type="text" id="searchInput" class="search-input" placeholder="아이디 검색..." onkeyup="filterList()">
                 <button class="sort-btn" onclick="toggleSort()">↕️ 정렬</button>
-                <button class="copy-btn" onclick="copyList()">📋 목록 복사</button>
+                <button class="sort-btn" onclick="toggleAll()">☑️ 전체</button>
+                <button class="copy-btn" onclick="copyList()">📋 선택 복사</button>
             </div>
 
             <div class="user-list" id="userList"></div>
@@ -773,8 +783,8 @@
             document.getElementById('tab-unfollowers').classList.toggle('active', tab === 'unfollowers');
             document.getElementById('tab-fans').classList.toggle('active', tab === 'fans');
 
-            document.getElementById('tab-unfollowers').innerText = `👿 배신자(?) (${globalUnfollowerList.length})`;
-            document.getElementById('tab-fans').innerText = `👼 내 팬(?) (${globalFanList.length})`;
+            document.getElementById('tab-unfollowers').innerText = `👿 배신자 (${globalUnfollowerList.length})`;
+            document.getElementById('tab-fans').innerText = `👼 내 팬 (${globalFanList.length})`;
 
             currentList = tab === 'unfollowers' ? [...globalUnfollowerList] : [...globalFanList];
             sortAsc = true;
@@ -798,7 +808,14 @@
             }
             let html = '';
             list.forEach(user => {
-                html += `<div class="user-item"><div class="user-info"><div class="user-avatar">👤</div><span class="user-name">${user}</span></div><a href="https://instagram.com/${user}" target="_blank" class="action-btn">확인 ></a></div>`;
+                html += `<div class="user-item">
+                    <div class="user-info">
+                        <input type="checkbox" class="user-checkbox" value="${user}">
+                        <div class="user-avatar">👤</div>
+                        <span class="user-name">${user}</span>
+                    </div>
+                    <a href="https://instagram.com/${user}" target="_blank" class="action-btn">확인 ></a>
+                </div>`;
             });
             userListDiv.innerHTML = html;
         }
@@ -812,8 +829,17 @@
         }
 
         function copyList() {
-            if (currentList.length === 0) return alert("복사할 목록이 없습니다.");
-            navigator.clipboard.writeText(currentList.join('\n')).then(() => alert("목록 복사 완료!"));
+            const checkboxes = document.querySelectorAll('.user-checkbox:checked');
+            if (checkboxes.length === 0) return alert("선택된 아이디가 없습니다. 복사할 사람을 체크해 주세요.");
+            const selectedUsers = Array.from(checkboxes).map(cb => cb.value);
+            navigator.clipboard.writeText(selectedUsers.join('\n')).then(() => alert(`${selectedUsers.length}명의 아이디가 복사되었습니다!`));
+        }
+
+        let allChecked = false;
+        function toggleAll() {
+            allChecked = !allChecked;
+            const checkboxes = document.querySelectorAll('.user-checkbox');
+            checkboxes.forEach(cb => cb.checked = allChecked);
         }
 
         function resetApp() {
