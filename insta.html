@@ -603,9 +603,8 @@
             <div class="summary-box" id="summaryBox"></div>
 
             <div class="tabs">
-                <button class="tab-btn active" onclick="switchTab('unfollowers')" id="tab-unfollowers">😡 맞팔 안 한
-                    사람</button>
-                <button class="tab-btn" onclick="switchTab('fans')" id="tab-fans">😍 내가 맞팔 안 한 사람</button>
+                <button class="tab-btn active" onclick="switchTab('unfollowers')" id="tab-unfollowers">� 배신자</button>
+                <button class="tab-btn" onclick="switchTab('fans')" id="tab-fans">� 내 팬</button>
             </div>
 
             <div class="tools">
@@ -761,7 +760,7 @@
                 </div>
                 <div class="stat-row" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid var(--border);">
                     <div class="stat-item"><span>배신자(?)</span><strong style="color:#ed4956">${unfollowerList.length}</strong></div>
-                    <div class="stat-item"><span>내가 맞팔 안 한 사람</span><strong style="color:#f09433">${fanList.length}</strong></div>
+                    <div class="stat-item"><span>내 팬</span><strong style="color:#f09433">${fanList.length}</strong></div>
                 </div>
                 ${followersCount < 10 && followingCount > 100 ? `<div class="ghost-alert">⚠️ 데이터가 이상합니다. '전체 기간'으로 다운받으셨나요?</div>` : ''}
             `;
@@ -773,8 +772,8 @@
             document.getElementById('tab-unfollowers').classList.toggle('active', tab === 'unfollowers');
             document.getElementById('tab-fans').classList.toggle('active', tab === 'fans');
 
-            document.getElementById('tab-unfollowers').innerText = `😡 맞팔 안 한 사람 (${globalUnfollowerList.length})`;
-            document.getElementById('tab-fans').innerText = `😍 내가 맞팔 안 한 사람 (${globalFanList.length})`;
+            document.getElementById('tab-unfollowers').innerText = `� 배신자 (${globalUnfollowerList.length})`;
+            document.getElementById('tab-fans').innerText = `� 내 팬 (${globalFanList.length})`;
 
             currentList = tab === 'unfollowers' ? [...globalUnfollowerList] : [...globalFanList];
             sortAsc = true;
