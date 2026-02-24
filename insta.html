@@ -325,25 +325,6 @@
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
         }
 
-        .demo-btn {
-            width: 100%;
-            padding: 14px;
-            background: rgba(255, 255, 255, 0.05);
-            color: #aaaaaa;
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            font-size: 13.5px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            margin-top: 10px;
-        }
-
-        .demo-btn:hover {
-            background: rgba(255, 255, 255, 0.1);
-            color: #fff;
-        }
-
         .reset-btn {
             width: 100%;
             padding: 16px;
@@ -613,7 +594,6 @@
         </div>
 
         <button class="analyze-btn" onclick="analyzeFiles()">🔍 판독 시작하기</button>
-        <button class="demo-btn" onclick="runDemo()">🎁 파일이 없나요? 샘플 데이터로 체험해보기</button>
 
         <div id="result">
             <div class="summary-box" id="summaryBox"></div>
@@ -675,7 +655,6 @@
 
             btn.innerHTML = '<div class="spinner"></div>데이터 분석 중...';
             btn.disabled = true;
-            document.querySelector('.demo-btn').style.display = 'none';
             document.getElementById('result').style.display = 'none';
             debugFileNames = { following: [], followers: [] };
 
@@ -839,34 +818,8 @@
             updateLabel('label-following', 'text-following', null, 'following');
             updateLabel('label-followers', 'text-followers', null, 'followers');
             document.getElementById('result').style.display = 'none';
-            document.querySelector('.demo-btn').style.display = 'block';
             document.getElementById('searchInput').value = '';
             window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        function runDemo() {
-            const demoFollowing = ['cristiano', 'leomessi', 'therock', 'kendalljenner', 'justinbieber', 'arianagrande', 'beyonce', 'mrbeast'];
-            const demoFollowers = ['cristiano', 'therock', 'justinbieber', 'realmadrid', 'fcbarcelona', 'taylorswift', 'mrbeast', 'nba'];
-
-            const btn = document.querySelector('.analyze-btn');
-            btn.innerHTML = '<div class="spinner"></div>샘플 데이터 분석 중...';
-            btn.disabled = true;
-            document.querySelector('.demo-btn').style.display = 'none';
-            document.getElementById('result').style.display = 'none';
-
-            setTimeout(() => {
-                const followingSet = new Set(demoFollowing);
-                const followersSet = new Set(demoFollowers);
-                globalUnfollowerList = demoFollowing.filter(user => !followersSet.has(user));
-                globalFanList = demoFollowers.filter(user => !followingSet.has(user));
-
-                displayResult(globalUnfollowerList, globalFanList, demoFollowing.length, demoFollowers.length);
-                document.getElementById('result').style.display = 'block';
-                setTimeout(() => document.getElementById('result').scrollIntoView({ behavior: 'smooth' }), 100);
-
-                btn.innerHTML = '🔍 판독 시작하기';
-                btn.disabled = false;
-            }, 1200);
         }
     </script>
 </body>
