@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>외계어 번역기 - OneTool</title>
+    <style>
+        :root {
+            --bg: #0f0f11;
+            --card: rgba(30, 30, 30, 0.6);
+            --text: #ffffff;
+            --sub: #aaaaaa;
+            --accent: linear-gradient(135deg, #0095f6, #9c27b0);
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, "Pretendard", Roboto, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            padding: 20px;
+            box-sizing: border-box;
+            padding-bottom: 60px;
+        }
+
+        header {
+            text-align: center;
+            margin-top: 40px;
+            margin-bottom: 30px;
+        }
+
+        .safety-badge {
+            display: inline-block;
+            background: rgba(156, 39, 176, 0.1);
+            color: #d896ff;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            border: 1px solid rgba(156, 39, 176, 0.2);
+        }
+
+        h2 {
+            font-size: 26px;
+            font-weight: 800;
+            margin: 15px 0 5px 0;
+            background: var(--accent);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .desc {
+            color: var(--sub);
+            font-size: 14px;
+            line-height: 1.5;
+            margin: 0;
+        }
+
+        /* 탭 형식 모드 선택 */
+        .mode-tabs {
+            display: flex;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 5px;
+            border-radius: 14px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+            white-space: nowrap;
+            /* 스크롤바 숨기기 */
+            -ms-overflow-style: none;
+            /* IE and Edge */
+            scrollbar-width: none;
+            /* Firefox */
+        }
+
+        .mode-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--sub);
+            padding: 12px 15px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .tab-btn.active {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 입력 & 출력 영역 */
+        .box-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--sub);
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .copy-btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .copy-btn:active {
+            opacity: 0.7;
+        }
+
+        .textarea-box {
+            width: 100%;
+            height: 150px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 15px;
+            color: white;
+            font-size: 15px;
+            font-family: inherit;
+            line-height: 1.5;
+            resize: none;
+            box-sizing: border-box;
+            outline: none;
+            transition: border-color 0.3s;
+            margin-bottom: 20px;
+        }
+
+        .textarea-box:focus {
+            border-color: #9c27b0;
+        }
+
+        .textarea-box::placeholder {
+            color: #555;
+        }
+
+        #resultBox {
+            background: rgba(0, 0, 0, 0.4);
+            border-style: dashed;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            text-decoration: none;
+            font-size: 20px;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 100;
+        }
+    </style>
+</head>
+
+<body>
+    <a href="index.html" class="back-btn">←</a>
+
+    <div class="container">
+        <header>
+            <div class="safety-badge">✨ 2000s & MZ</div>
+            <br>
+            <h2>외계어 번역기</h2>
+            <p class="desc">평범한 글은 지루할 때.<br>초성, 특수기호, 외계어로 변환해 보세요.</p>
+        </header>
+
+        <div class="mode-tabs">
+            <button class="tab-btn active" onclick="setMode('alien', this)">★외계어☆</button>
+            <button class="tab-btn" onclick="setMode('chosung', this)">ㅋㅋ초성</button>
+            <button class="tab-btn" onclick="setMode('yamin', this)">야민정음</button>
+            <button class="tab-btn" onclick="setMode('king', this)">킹받는말투</button>
+        </div>
+
+        <div class="box-title">원본 입력</div>
+        <textarea id="inputBox" class="textarea-box" placeholder="변환할 내용을 입력하세요. (예: 안녕하세요 오늘 날씨가 참 좋네요)"></textarea>
+
+        <div class="box-title">
+            변환 결과
+            <button class="copy-btn" onclick="copyResult()">📋 복사하기</button>
+        </div>
+        <textarea id="resultBox" class="textarea-box" readonly placeholder="여기에 결과가 나옵니다."></textarea>
+    </div>
+
+    <script>
+        const inputBox = document.getElementById('inputBox');
+        const resultBox = document.getElementById('resultBox');
+        let currentMode = 'alien';
+
+        // 한글 초성 배열
+        const CHOSUNGS = [
+            'ㄱ', 'ㄲ', 'ㄴ', 'ㄷ', 'ㄸ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅃ', 'ㅅ', 'ㅆ', 'ㅇ', 'ㅈ', 'ㅉ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ'
+        ];
+
+        // 1. 외계어 맵퍼 (간단 버전)
+        const alienMap = {
+            '안': 'ØГ', '녕': '녕', '하': '㈛', '세': 'パㅔ', '요': '요..☆',
+            '오': '오', '늘': '㉛', '날': '날', '씨': '㉡', '가': '가',
+            '좋': '좋', '네': 'LH', '요': '요..☆', '사': 'バr', '랑': '己Б',
+            '해': 'ぁĦ', '미': 'ㅁı', '안': 'ØГ', '나': 'ㄴr', '너': '너',
+            '눈': '눈', '물': '물', '슬': '슬', '퍼': 'ㅍㅓ', '기': 'ㄱı',
+            '쁨': '쁨', '행': 'ぁĦㅇ', '복': '복', '친': 'ㅊıㄴ', '구': 'ㄱㅜ',
+            '이': 'oㅣ', '야': 'Oㅑ', '그': 'ㄱユ', '래': '己H'
+        };
+
+        // 2. 야민정음 맵퍼
+        const yaminMap = {
+            '대': '머', '머': '대', '명': '띵', '띵': '명', '귀': '커', '커': '귀',
+            '팔': '핲', '핲': '팔', '유': '윾', '윾': '유', '광': '팡', '팡': '광',
+            '고': 'ㅍ', '피': '끠', '근': 'ㄹ', '위': '읭', '비': '네', '네': '비',
+            '식': '싻', '왕': '왱', '물': '뮬', '장': '쟝', '파': '과'
+        };
+
+        inputBox.addEventListener('input', translate);
+
+        function setMode(mode, btnElement) {
+            currentMode = mode;
+
+            // 탭 UI 업데이트
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            btnElement.classList.add('active');
+
+            translate();
+        }
+
+        function translate() {
+            const text = inputBox.value;
+            if (!text) {
+                resultBox.value = '';
+                return;
+            }
+
+            let result = '';
+
+            if (currentMode === 'alien') {
+                for (let char of text) {
+                    result += alienMap[char] || char; // 매핑 없으면 원본
+                }
+                // 약간의 특수문자 랜덤 추가 (줄바꿈이나 공백 뒤에)
+                result = result.replace(/ /g, ' * ');
+            }
+            else if (currentMode === 'chosung') {
+                for (let char of text) {
+                    const code = char.charCodeAt(0) - 44032;
+                    if (code >= 0 && code <= 11171) {
+                        result += CHOSUNGS[Math.floor(code / 588)];
+                    } else {
+                        result += char;
+                    }
+                }
+            }
+            else if (currentMode === 'yamin') {
+                for (let char of text) {
+                    result += yaminMap[char] || char;
+                }
+            }
+            else if (currentMode === 'king') {
+                // 킹받는 말투
+                result = text.replace(/요/g, '용루~')
+                    .replace(/다/g, '당켁ㅋ')
+                    .replace(/까/g, '까루룩?')
+                    .replace(/아/g, '응애')
+                    .replace(/어/g, '엉')
+                    .replace(/오/g, '옹') + ' (어쩔티비~)';
+            }
+
+            resultBox.value = result;
+        }
+
+        function copyResult() {
+            const text = resultBox.value;
+            if (!text) return alert('복사할 내용이 없습니다!');
+
+            navigator.clipboard.writeText(text).then(() => {
+                alert('복사되었습니다! 어딘가에 붙여넣어 보세요 😎');
+            });
+        }
+    </script>
+</body>
+
+</html>

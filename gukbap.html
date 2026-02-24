@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>국밥 화폐 계산기 - OneTool</title>
+    <style>
+        :root {
+            --bg: #0f0f11;
+            --card: rgba(30, 30, 30, 0.6);
+            --text: #ffffff;
+            --sub: #aaaaaa;
+            --accent: linear-gradient(135deg, #0095f6, #9c27b0);
+            --border: rgba(255, 255, 255, 0.1);
+            --success: #28a745;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, "Pretendard", Roboto, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            padding: 20px;
+            box-sizing: border-box;
+            padding-bottom: 60px;
+            position: relative;
+        }
+
+        header {
+            text-align: center;
+            margin-top: 40px;
+            margin-bottom: 30px;
+        }
+
+        .safety-badge {
+            display: inline-block;
+            background: rgba(0, 149, 246, 0.1);
+            color: #0095f6;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            border: 1px solid rgba(0, 149, 246, 0.2);
+        }
+
+        h2 {
+            font-size: 26px;
+            font-weight: 800;
+            margin: 15px 0 5px 0;
+            background: var(--accent);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .desc {
+            color: var(--sub);
+            font-size: 14px;
+            line-height: 1.5;
+            margin: 0;
+        }
+
+        /* 입력 영역 */
+        .input-box {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 25px 20px;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .input-label {
+            display: block;
+            color: var(--sub);
+            font-size: 13px;
+            margin-bottom: 12px;
+        }
+
+        .money-input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+
+        .money-input {
+            width: 100%;
+            max-width: 250px;
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid var(--sub);
+            color: white;
+            font-size: 32px;
+            font-weight: 800;
+            text-align: center;
+            padding: 5px;
+            outline: none;
+            transition: border-color 0.3s;
+            font-family: inherit;
+        }
+
+        .money-input:focus {
+            border-color: #0095f6;
+        }
+
+        .money-unit {
+            font-size: 24px;
+            font-weight: 700;
+            margin-left: 8px;
+            color: var(--sub);
+        }
+
+        /* 프리셋 버튼 */
+        .presets {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .preset-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            color: white;
+            padding: 8px 14px;
+            border-radius: 12px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .preset-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* 결과 리스트 */
+        .result-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .result-item {
+            display: flex;
+            align-items: center;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 16px;
+            transition: transform 0.2s;
+        }
+
+        .result-item:hover {
+            transform: scale(1.02);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .item-icon {
+            font-size: 36px;
+            margin-right: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 16px;
+            flex-shrink: 0;
+        }
+
+        .item-info {
+            flex: 1;
+        }
+
+        .item-name {
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .item-desc {
+            font-size: 12px;
+            color: var(--sub);
+        }
+
+        .item-value {
+            text-align: right;
+        }
+
+        .item-count {
+            font-size: 24px;
+            font-weight: 800;
+            color: #f09433;
+        }
+
+        .item-unit {
+            font-size: 14px;
+            color: var(--sub);
+            margin-left: 2px;
+        }
+
+        /* 테마별 하이라이트 */
+        .item-count.highlight-blue {
+            color: #0095f6;
+        }
+
+        .item-count.highlight-green {
+            color: #28a745;
+        }
+
+        .item-count.highlight-purple {
+            color: #9c27b0;
+        }
+
+        /* 뒤로가기 버튼 */
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            text-decoration: none;
+            font-size: 20px;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 100;
+            transition: background 0.3s;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+
+<body>
+    <a href="index.html" class="back-btn">←</a>
+
+    <div class="container">
+        <header>
+            <div class="safety-badge">💸 체감 물가 100%</div>
+            <br>
+            <h2>국밥 화폐 계산기</h2>
+            <p class="desc">지금 내 돈, 진짜 가치는 얼마일까?<br>금액을 입력하면 실물 경제(?)로 바꿔드립니다.</p>
+        </header>
+
+        <div class="input-box">
+            <span class="input-label">비교해보고 싶은 금액을 입력하세요</span>
+            <div class="money-input-wrapper">
+                <input type="text" inputmode="numeric" id="moneyInput" class="money-input" placeholder="0"
+                    oninput="formatAndCalculate(this)">
+                <span class="money-unit">원</span>
+            </div>
+            <div class="presets">
+                <button class="preset-btn" onclick="addAmount(10000)">+1만</button>
+                <button class="preset-btn" onclick="addAmount(50000)">+5만</button>
+                <button class="preset-btn" onclick="addAmount(100000)">+10만</button>
+                <button class="preset-btn" onclick="addAmount(1000000)">+100만</button>
+                <button class="preset-btn" onclick="clearAmount()"
+                    style="background: rgba(237, 73, 86, 0.2); border-color: rgba(237, 73, 86, 0.3);">지우기</button>
+            </div>
+        </div>
+
+        <div class="result-list" id="resultList">
+            <!-- 결과 아이템이 JavaScript로 렌더링 됩니다. -->
+        </div>
+    </div>
+
+    <script>
+        const items = [
+            { id: 'gukbap', icon: '🍲', name: '뜨끈한 국밥', desc: '기준가 9,000원', price: 9000, unit: '그릇', color: 'highlight-orange' },
+            { id: 'coffee', icon: '☕', name: '메가커피 아메리카노', desc: '기준가 2,000원', price: 2000, unit: '잔', color: 'highlight-orange' },
+            { id: 'chicken', icon: '🍗', name: '황금올리브 치킨', desc: '기준가 23,000원', price: 23000, unit: '마리', color: 'highlight-orange' },
+            { id: 'netflix', icon: '🎬', name: '넷플릭스 프리미엄', desc: '기준가 17,000원', price: 17000, unit: '개월', color: 'highlight-purple' },
+            { id: 'nintendo', icon: '🎮', name: '닌텐도 스위치 OLED', desc: '기준가 415,000원', price: 415000, unit: '대', color: 'highlight-blue' },
+            { id: 'airpods', icon: '🎧', name: '에어팟 프로 2세대', desc: '기준가 359,000원', price: 359000, unit: '대', color: 'highlight-blue' }
+        ];
+
+        let currentAmount = 0;
+        const inputEl = document.getElementById('moneyInput');
+        const resultListEl = document.getElementById('resultList');
+
+        function formatAndCalculate(input) {
+            // 숫자만 남기기
+            let value = input.value.replace(/[^0-9]/g, '');
+            if (value === '') {
+                currentAmount = 0;
+                input.value = '';
+            } else {
+                currentAmount = parseInt(value, 10);
+                input.value = currentAmount.toLocaleString('ko-KR');
+            }
+            renderResults();
+        }
+
+        function addAmount(amount) {
+            currentAmount += amount;
+            inputEl.value = currentAmount.toLocaleString('ko-KR');
+            renderResults();
+        }
+
+        function clearAmount() {
+            currentAmount = 0;
+            inputEl.value = '';
+            renderResults();
+        }
+
+        function renderResults() {
+            if (currentAmount === 0) {
+                resultListEl.innerHTML = `<div style="text-align:center; padding: 40px 20px; color: var(--sub); font-size: 14px;">금액을 입력하시면<br>재미있는 결과가 나옵니다!</div>`;
+                return;
+            }
+
+            let html = '';
+            items.forEach(item => {
+                const count = (currentAmount / item.price).toFixed(1);
+                // 소수점이 .0 이면 정수로 표시
+                const displayCount = count.endsWith('.0') ? parseInt(count) : count;
+
+                html += `
+                    <div class="result-item">
+                        <div class="item-icon">${item.icon}</div>
+                        <div class="item-info">
+                            <div class="item-name">${item.name}</div>
+                            <div class="item-desc">${item.desc}</div>
+                        </div>
+                        <div class="item-value">
+                            <span class="item-count ${item.color || ''}">${displayCount.toLocaleString()}</span>
+                            <span class="item-unit">${item.unit}</span>
+                        </div>
+                    </div>
+                `;
+            });
+            resultListEl.innerHTML = html;
+        }
+
+        // 초기 렌더링
+        renderResults();
+    </script>
+</body>
+
+</html>

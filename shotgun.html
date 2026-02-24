@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>분노 게이지 샷건 테스트 - OneTool</title>
+    <style>
+        :root {
+            --bg: #0f0f11;
+            --card: rgba(30, 30, 30, 0.6);
+            --text: #ffffff;
+            --sub: #aaaaaa;
+            --danger: #ed4956;
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, "Pretendard", Roboto, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow: hidden;
+            /* 진동 효과 짤림 방지 */
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            padding: 20px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            position: relative;
+        }
+
+        header {
+            text-align: center;
+            margin-top: 40px;
+            margin-bottom: 20px;
+        }
+
+        .safety-badge {
+            display: inline-block;
+            background: rgba(237, 73, 86, 0.1);
+            color: #ffb3b8;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            border: 1px solid rgba(237, 73, 86, 0.2);
+        }
+
+        h2 {
+            font-size: 26px;
+            font-weight: 800;
+            margin: 15px 0 5px 0;
+            color: var(--danger);
+        }
+
+        .desc {
+            color: var(--sub);
+            font-size: 14px;
+            line-height: 1.5;
+            margin: 0;
+        }
+
+        /* 플레이 영역 */
+        .play-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .hud {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-bottom: 30px;
+            padding: 15px 20px;
+            background: var(--card);
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            box-sizing: border-box;
+        }
+
+        .hud-item {
+            text-align: center;
+            width: 45%;
+        }
+
+        .hud-label {
+            font-size: 12px;
+            color: var(--sub);
+            margin-bottom: 4px;
+        }
+
+        .hud-value {
+            font-size: 32px;
+            font-weight: 800;
+            font-variant-numeric: tabular-nums;
+        }
+
+        #timerText {
+            color: var(--danger);
+        }
+
+        #scoreText {
+            color: #f09433;
+        }
+
+        /* 타격 버튼 */
+        .hit-btn-wrapper {
+            position: relative;
+            width: 240px;
+            height: 240px;
+            margin: 0 auto;
+        }
+
+        .hit-btn {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #ff5e62, #e52837);
+            border: none;
+            box-shadow:
+                0 10px 20px rgba(0, 0, 0, 0.5),
+                inset 0 -10px 20px rgba(0, 0, 0, 0.3),
+                inset 0 4px 10px rgba(255, 255, 255, 0.4);
+            cursor: pointer;
+            outline: none;
+            color: white;
+            font-size: 24px;
+            font-weight: 800;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            transition: transform 0.05s, filter 0.1s;
+        }
+
+        .hit-btn:active {
+            transform: scale(0.92);
+            box-shadow:
+                0 5px 10px rgba(0, 0, 0, 0.5),
+                inset 0 -5px 10px rgba(0, 0, 0, 0.3);
+            filter: brightness(0.8);
+        }
+
+        .hit-btn.disabled {
+            background: #444;
+            cursor: not-allowed;
+            box-shadow: none;
+            color: #888;
+        }
+
+        /* 화면 흔들림 애니메이션 */
+        @keyframes shake {
+            0% {
+                transform: translate(1px, 1px) rotate(0deg);
+            }
+
+            10% {
+                transform: translate(-1px, -2px) rotate(-1deg);
+            }
+
+            20% {
+                transform: translate(-3px, 0px) rotate(1deg);
+            }
+
+            30% {
+                transform: translate(3px, 2px) rotate(0deg);
+            }
+
+            40% {
+                transform: translate(1px, -1px) rotate(1deg);
+            }
+
+            50% {
+                transform: translate(-1px, 2px) rotate(-1deg);
+            }
+
+            60% {
+                transform: translate(-3px, 1px) rotate(0deg);
+            }
+
+            70% {
+                transform: translate(3px, 1px) rotate(-1deg);
+            }
+
+            80% {
+                transform: translate(-1px, -1px) rotate(1deg);
+            }
+
+            90% {
+                transform: translate(1px, 2px) rotate(0deg);
+            }
+
+            100% {
+                transform: translate(1px, -2px) rotate(-1deg);
+            }
+        }
+
+        .shaking {
+            animation: shake 0.2s cubic-bezier(.36, .07, .19, .97) both infinite;
+        }
+
+        /* 클릭 이펙트 */
+        .click-effect {
+            position: absolute;
+            pointer-events: none;
+            color: white;
+            font-weight: 800;
+            font-size: 20px;
+            text-shadow: 0 0 5px rgba(255, 0, 0, 0.8);
+            animation: floatUp 0.5s ease-out forwards;
+            z-index: 10;
+        }
+
+        @keyframes floatUp {
+            0% {
+                opacity: 1;
+                transform: translateY(0) scale(1.2);
+            }
+
+            100% {
+                opacity: 0;
+                transform: translateY(-40px) scale(0.8);
+            }
+        }
+
+        /* 결과 모달 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal {
+            background: #1a1a1a;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            width: 90%;
+            max-width: 320px;
+            transform: scale(0.8);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .modal-overlay.show .modal {
+            transform: scale(1);
+        }
+
+        .modal-tier {
+            font-size: 60px;
+            margin-bottom: 10px;
+        }
+
+        .modal-title {
+            font-size: 22px;
+            font-weight: 800;
+            margin-bottom: 5px;
+            color: var(--danger);
+        }
+
+        .modal-desc {
+            font-size: 14px;
+            color: var(--sub);
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+
+        .modal-score {
+            font-size: 40px;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 25px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px;
+            border-radius: 12px;
+        }
+
+        .modal-score span {
+            font-size: 16px;
+            color: var(--sub);
+        }
+
+        .retry-btn {
+            background: var(--text);
+            color: var(--bg);
+            border: none;
+            padding: 14px 0;
+            width: 100%;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            text-decoration: none;
+            font-size: 20px;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 100;
+        }
+    </style>
+</head>
+
+<body>
+    <a href="index.html" class="back-btn">←</a>
+
+    <div class="container" id="mainContainer">
+        <header>
+            <div class="safety-badge">⚡ 10초 광클 챌린지</div>
+            <h2>분노 게이지 샷건 테스트</h2>
+            <p class="desc">쌓인 스트레스, 버튼에 다 풀어버리세요.<br>제한시간 10초! 최대한 빨리 누르세요.</p>
+        </header>
+
+        <div class="play-area">
+            <div class="hud">
+                <div class="hud-item">
+                    <div class="hud-label">남은 시간</div>
+                    <div class="hud-value" id="timerText">10.00</div>
+                </div>
+                <div class="hud-item">
+                    <div class="hud-label">클릭 횟수</div>
+                    <div class="hud-value" id="scoreText">0</div>
+                </div>
+            </div>
+
+            <div class="hit-btn-wrapper" id="btnWrapper">
+                <button class="hit-btn" id="hitBtn" ontouchstart="handleHit(event)" onmousedown="handleHit(event)">여기를
+                    누르세요</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 결과 모달 -->
+    <div class="modal-overlay" id="resultModal">
+        <div class="modal">
+            <div class="modal-tier" id="modalTier">💬</div>
+            <div class="modal-title" id="modalTitle">결과 타이틀</div>
+            <div class="modal-desc" id="modalDesc">결과 설명이 들어갑니다.</div>
+            <div class="modal-score" id="modalScore">0 <span>HIT!</span></div>
+            <button class="retry-btn" onclick="resetGame()">다시 도전하기</button>
+        </div>
+    </div>
+
+    <script>
+        let score = 0;
+        let timeLeft = 10.00;
+        let timerInterval;
+        let isPlaying = false;
+        let isGameOver = false;
+
+        const hitBtn = document.getElementById('hitBtn');
+        const timerText = document.getElementById('timerText');
+        const scoreText = document.getElementById('scoreText');
+        const btnWrapper = document.getElementById('btnWrapper');
+        const mainContainer = document.getElementById('mainContainer');
+        const resultModal = document.getElementById('resultModal');
+
+        const tiers = [
+            { min: 0, title: "해탈한 부처", emoji: "🧘", desc: "분노가 전혀 없군요. 혹시 지금 명상 중이신가요?" },
+            { min: 30, title: "참을성 쩌는 직장인", emoji: "😐", desc: "이 정도 스트레스엔 끄떡없습니다. 평범하네요." },
+            { min: 50, title: "물어뜯기 직전의 치와와", emoji: "🐶", desc: "부글부글 끓기 시작했습니다. 건들면 물어요!" },
+            { min: 75, title: "키보드 파괴자", emoji: "⌨️", desc: "샷건 치는 소리가 여기까지 들립니다. 진정하세요!" },
+            { min: 100, title: "팀장님 명치 때린 헐크", emoji: "🦍", desc: "분노가 한계를 돌파했습니다! 모니터 안 깨졌나요?" },
+            { min: 120, title: "신들린 매크로 손가락", emoji: "⚡", desc: "물리 법칙을 무시한 속도! 사람이 맞긴 한가요?" }
+        ];
+
+        function handleHit(e) {
+            // 안드로이드 터치 중복 방지 (기본 마우스/터치 처리)
+            if (e.type === 'touchstart') e.preventDefault();
+
+            if (isGameOver) return;
+
+            if (!isPlaying) {
+                startGame();
+            }
+
+            score++;
+            scoreText.innerText = score;
+
+            // 시각적 피드백 생성
+            createClickEffect(e);
+
+            // 흔들림 강도 조정 (50타 이상부터 화면 전체가 흔들림)
+            if (score > 50) {
+                mainContainer.classList.add('shaking');
+                // 100ms 후 흔들림 클래스 제거 (계속 연타하면 계속 흔들림)
+                setTimeout(() => mainContainer.classList.remove('shaking'), 100);
+            }
+        }
+
+        function createClickEffect(e) {
+            const effect = document.createElement('div');
+            effect.className = 'click-effect';
+            effect.innerText = '💥';
+
+            let x = 120, y = 120; // 기본 중앙값 (버튼 기준)
+
+            if (e.touches && e.touches.length > 0) {
+                const rect = btnWrapper.getBoundingClientRect();
+                x = e.touches[0].clientX - rect.left - 10;
+                y = e.touches[0].clientY - rect.top - 10;
+            } else if (e.clientX !== undefined) {
+                const rect = btnWrapper.getBoundingClientRect();
+                x = e.clientX - rect.left - 10;
+                y = e.clientY - rect.top - 10;
+            }
+
+            // 약간의 랜덤 오프셋
+            x += (Math.random() - 0.5) * 40;
+            y += (Math.random() - 0.5) * 40;
+
+            effect.style.left = `${x}px`;
+            effect.style.top = `${y}px`;
+
+            // 랜덤 회전
+            effect.style.transform = `rotate(${(Math.random() - 0.5) * 60}deg)`;
+
+            btnWrapper.appendChild(effect);
+
+            // 애니메이션 끝나면 DOM 제거
+            setTimeout(() => {
+                if (btnWrapper.contains(effect)) btnWrapper.removeChild(effect);
+            }, 500);
+        }
+
+        function startGame() {
+            isPlaying = true;
+            hitBtn.innerText = "연타 시작!!";
+            hitBtn.style.background = "radial-gradient(circle at 30% 30%, #ff1c22, #b8000a)";
+
+            timerInterval = setInterval(() => {
+                timeLeft -= 0.01;
+                if (timeLeft <= 0) {
+                    timeLeft = 0;
+                    endGame();
+                }
+                // 소수점 2자리 
+                timerText.innerText = timeLeft.toFixed(2);
+            }, 10);
+        }
+
+        function endGame() {
+            clearInterval(timerInterval);
+            isPlaying = false;
+            isGameOver = true;
+            mainContainer.classList.remove('shaking');
+
+            hitBtn.classList.add('disabled');
+            hitBtn.innerText = "종료";
+
+            showResult();
+        }
+
+        function showResult() {
+            let myTier = tiers[0];
+            for (let i = 0; i < tiers.length; i++) {
+                if (score >= tiers[i].min) {
+                    myTier = tiers[i];
+                }
+            }
+
+            document.getElementById('modalTier').innerText = myTier.emoji;
+            document.getElementById('modalTitle').innerText = myTier.title;
+            document.getElementById('modalDesc').innerText = myTier.desc;
+            document.getElementById('modalScore').innerHTML = `${score} <span>HIT!</span>`;
+
+            setTimeout(() => {
+                resultModal.classList.add('show');
+            }, 500);
+        }
+
+        function resetGame() {
+            resultModal.classList.remove('show');
+            score = 0;
+            timeLeft = 10.00;
+            isPlaying = false;
+            isGameOver = false;
+
+            scoreText.innerText = '0';
+            timerText.innerText = '10.00';
+
+            hitBtn.classList.remove('disabled');
+            hitBtn.innerText = "여기를 누르세요";
+            hitBtn.style.background = "radial-gradient(circle at 30% 30%, #ff5e62, #e52837)";
+        }
+    </script>
+</body>
+
+</html>
