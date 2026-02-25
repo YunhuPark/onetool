@@ -537,6 +537,31 @@
             border-radius: 10px;
             text-align: center;
         }
+
+        .new-badge {
+            background: linear-gradient(135deg, #ff5e62, #ff9966);
+            color: #fff;
+            font-size: 10px;
+            font-weight: 800;
+            padding: 2px 5px;
+            border-radius: 4px;
+            margin-left: 6px;
+            display: inline-block;
+            vertical-align: middle;
+            animation: pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes pop {
+            0% {
+                transform: scale(0.5);
+                opacity: 0;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
     </style>
 </head>
 
@@ -627,6 +652,16 @@
         let sortAsc = true;
         let debugFileNames = { following: [], followers: [] };
 
+        let previousUnfollowerList = null;
+        let previousFanList = null;
+
+        window.addEventListener('beforeunload', function (e) {
+            if (document.getElementById('result').style.display === 'block') {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        });
+
         document.getElementById('followingFile').addEventListener('change', function (e) {
             updateLabel('label-following', 'text-following', e.target.files[0], 'following');
         });
@@ -678,6 +713,18 @@
 
                 globalUnfollowerList = followingList.filter(user => !followersSet.has(user));
                 globalFanList = followersList.filter(user => !followingSet.has(user));
+
+                // 히스토리 비교 로직 (NEW 뱃지용)
+                const storedUnfollowers = localStorage.getItem('prevUnfollowers');
+                const storedFans = localStorage.getItem('prevFans');
+
+                // 첫 사용자면 전부 NEW로 뜨는 걸 방지하기 위해 현재 데이터를 그대로 복사
+                previousUnfollowerList = storedUnfollowers ? JSON.parse(storedUnfollowers) : [...globalUnfollowerList];
+                previousFanList = storedFans ? JSON.parse(storedFans) : [...globalFanList];
+
+                // 새로운 기록으로 업데이트
+                localStorage.setItem('prevUnfollowers', JSON.stringify(globalUnfollowerList));
+                localStorage.setItem('prevFans', JSON.stringify(globalFanList));
 
                 displayResult(globalUnfollowerList, globalFanList, followingList.length, followersList.length);
                 document.getElementById('result').style.display = 'block';
@@ -795,12 +842,19 @@
                 userListDiv.innerHTML = `<div style="text-align:center; padding: 40px; color: var(--sub);">🎉 모두가 맞팔 중입니다!</div>`;
                 return;
             }
+
+            const isUnfollowerTab = currentTab === 'unfollowers';
+            const prevList = isUnfollowerTab ? previousUnfollowerList : previousFanList;
+
             let html = '';
             list.forEach(user => {
+                const isNew = prevList && !prevList.includes(user);
+
                 html += `<div class="user-item">
                     <div class="user-info">
                         <div class="user-avatar">👤</div>
                         <span class="user-name" onclick="copyId('${user}')" title="클릭하여 복사">${user}</span>
+                        ${isNew ? '<span class="new-badge">NEW</span>' : ''}
                     </div>
                     <a href="https://instagram.com/${user}" target="_blank" class="action-btn">확인 ></a>
                 </div>`;

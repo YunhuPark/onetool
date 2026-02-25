@@ -201,6 +201,7 @@
             <button class="tab-btn" onclick="setMode('chosung', this)">ㅋㅋ초성</button>
             <button class="tab-btn" onclick="setMode('yamin', this)">야민정음</button>
             <button class="tab-btn" onclick="setMode('king', this)">킹받는말투</button>
+            <button class="tab-btn" onclick="setMode('otaku', this)">어둠의다크</button>
         </div>
 
         <div class="box-title">원본 입력</div>
@@ -293,6 +294,28 @@
                     .replace(/아/g, '응애')
                     .replace(/어/g, '엉')
                     .replace(/오/g, '옹') + ' (어쩔티비~)';
+            }
+            else if (currentMode === 'otaku') {
+                // 중2병/오타쿠 말투
+                result = text
+                    .replace(/나/g, '이 몸')
+                    .replace(/너/g, '네 녀석')
+                    .replace(/친구/g, '동료')
+                    .replace(/학교/g, '학교(지옥)')
+                    .replace(/회사/g, '회사(수용소)')
+                    .replace(/진짜/g, '크큭... 진심으로')
+                    .replace(/안녕/g, '어이.')
+                    .replace(/미안/g, '...사과하지.')
+                    .replace(/사랑해/g, '...네 영혼을 갈구한다.')
+                    .replace(/좋아/g, '훗, 나쁘지 않군.')
+                    .replace(/왜/g, '어째서...?!')
+                    .replace(/끝/g, '파멸')
+                    .replace(/아파/g, '큭...! 내 안의 흑염룡이...!')
+                    + ' (쑻)';
+
+                if (text.length > 5) {
+                    result = '「크큭... 세계가 부서지는 소리가 들리는군」\n\n' + result;
+                }
             }
 
             resultBox.value = result;

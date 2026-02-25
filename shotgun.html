@@ -15,6 +15,11 @@
             --border: rgba(255, 255, 255, 0.1);
         }
 
+        /* 스크롤바 숨김 (일부 모바일 브라우저 대비) */
+        ::-webkit-scrollbar {
+            display: none;
+        }
+
         body {
             margin: 0;
             padding: 0;
@@ -337,6 +342,8 @@
             z-index: 100;
         }
     </style>
+    <!-- 결과 이미지 저장을 위한 html2canvas CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 </head>
 
 <body>
@@ -346,7 +353,7 @@
         <header>
             <div class="safety-badge">⚡ 10초 광클 챌린지</div>
             <h2>분노 게이지 샷건 테스트</h2>
-            <p class="desc">쌓인 스트레스, 버튼에 다 풀어버리세요.<br>제한시간 10초! 최대한 빨리 누르세요.</p>
+            <p class="desc">쌓인 스트레스, 버튼에 다 풀어버리세요.<br>제한시간 10초! 마우스 광클 & <b>키보드 연타</b> 가능!</p>
         </header>
 
         <div class="play-area">
@@ -370,12 +377,14 @@
 
     <!-- 결과 모달 -->
     <div class="modal-overlay" id="resultModal">
-        <div class="modal">
+        <div class="modal" id="captureTarget">
             <div class="modal-tier" id="modalTier">💬</div>
             <div class="modal-title" id="modalTitle">결과 타이틀</div>
             <div class="modal-desc" id="modalDesc">결과 설명이 들어갑니다.</div>
             <div class="modal-score" id="modalScore">0 <span>HIT!</span></div>
-            <button class="retry-btn" onclick="resetGame()">다시 도전하기</button>
+            <button class="retry-btn" onclick="downloadResult()"
+                style="background:#0095f6; color:white; margin-bottom:10px;">📸 결과 이미지 저장하기</button>
+            <button class="retry-btn" onclick="resetGame()">🔄 다시 도전하기</button>
         </div>
     </div>
 
@@ -433,11 +442,11 @@
 
             let x = 120, y = 120; // 기본 중앙값 (버튼 기준)
 
-            if (e.touches && e.touches.length > 0) {
+            if (e && e.touches && e.touches.length > 0) {
                 const rect = btnWrapper.getBoundingClientRect();
                 x = e.touches[0].clientX - rect.left - 10;
                 y = e.touches[0].clientY - rect.top - 10;
-            } else if (e.clientX !== undefined) {
+            } else if (e && e.clientX !== undefined) {
                 const rect = btnWrapper.getBoundingClientRect();
                 x = e.clientX - rect.left - 10;
                 y = e.clientY - rect.top - 10;
@@ -520,6 +529,49 @@
             hitBtn.classList.remove('disabled');
             hitBtn.innerText = "여기를 누르세요";
             hitBtn.style.background = "radial-gradient(circle at 30% 30%, #ff5e62, #e52837)";
+        }
+
+        // 키보드 연타(가성비 샷건) 지원
+        window.addEventListener('keydown', (e) => {
+            // 결과창 떠있거나 스페이스바 스크롤 등 기본 동작 방지
+            if (e.code === 'Space') e.preventDefault();
+
+            if (isGameOver) return;
+
+            if (!isPlaying) startGame();
+
+            score++;
+            scoreText.innerText = score;
+
+            // 키보드 효과는 중앙에 뜨게 처리 (e 필드 부족)
+            createClickEffect(null);
+
+            if (score > 50) {
+                mainContainer.classList.add('shaking');
+                setTimeout(() => mainContainer.classList.remove('shaking'), 100);
+            }
+        });
+
+        // 짤 캡처 기능
+        function downloadResult() {
+            const target = document.getElementById('captureTarget');
+            // 버튼들 임시 숨김 (깔끔한 샷을 위해)
+            const btns = target.querySelectorAll('button');
+            btns.forEach(b => b.style.display = 'none');
+
+            // html2canvas 옵션 개선 (transform 깨짐 방지 위해 임시 저장)
+            html2canvas(target, {
+                backgroundColor: '#1a1a1a',
+                scale: 2
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `분노게이지_${score}HIT.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+
+                // 버튼 복구
+                btns.forEach(b => b.style.display = 'block');
+            });
         }
     </script>
 </body>

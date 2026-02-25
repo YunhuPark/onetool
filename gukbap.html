@@ -247,6 +247,81 @@
         .back-btn:hover {
             background: rgba(255, 255, 255, 0.2);
         }
+
+        /* 나만의 물가 추가 폼 */
+        .custom-add-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px dashed var(--sub);
+            color: var(--sub);
+            padding: 16px;
+            border-radius: 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 15px;
+        }
+
+        .custom-add-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-color: white;
+        }
+
+        .custom-form {
+            display: none;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 15px;
+            margin-top: 10px;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .form-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .form-input {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--border);
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            box-sizing: border-box;
+        }
+
+        .form-input:focus {
+            border-color: #0095f6;
+        }
+
+        .form-submit {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+        }
     </style>
 </head>
 
@@ -281,10 +356,24 @@
         <div class="result-list" id="resultList">
             <!-- 결과 아이템이 JavaScript로 렌더링 됩니다. -->
         </div>
+
+        <div class="custom-add-btn" id="showFormBtn" onclick="toggleForm()">+ 나만의 체감 물가 추가</div>
+
+        <div class="custom-form" id="customForm">
+            <div class="form-row">
+                <input type="text" id="cIcon" class="form-input" placeholder="아이콘(예:📱)" style="flex: 0.3;">
+                <input type="text" id="cName" class="form-input" placeholder="이름 (예: 아이폰15)">
+            </div>
+            <div class="form-row">
+                <input type="number" id="cPrice" class="form-input" placeholder="가격 (숫자만입력)">
+                <input type="text" id="cUnit" class="form-input" placeholder="단위(예:대)" style="flex: 0.3;">
+            </div>
+            <button class="form-submit" onclick="addCustomItem()">추가하기</button>
+        </div>
     </div>
 
     <script>
-        const items = [
+        const defaultItems = [
             { id: 'gukbap', icon: '🍲', name: '뜨끈한 국밥', desc: '기준가 9,000원', price: 9000, unit: '그릇', color: 'highlight-orange' },
             { id: 'coffee', icon: '☕', name: '메가커피 아메리카노', desc: '기준가 2,000원', price: 2000, unit: '잔', color: 'highlight-orange' },
             { id: 'chicken', icon: '🍗', name: '황금올리브 치킨', desc: '기준가 23,000원', price: 23000, unit: '마리', color: 'highlight-orange' },
@@ -292,6 +381,14 @@
             { id: 'nintendo', icon: '🎮', name: '닌텐도 스위치 OLED', desc: '기준가 415,000원', price: 415000, unit: '대', color: 'highlight-blue' },
             { id: 'airpods', icon: '🎧', name: '에어팟 프로 2세대', desc: '기준가 359,000원', price: 359000, unit: '대', color: 'highlight-blue' }
         ];
+
+        let items = [...defaultItems];
+
+        // 로컬스토리지에서 커스텀 아이템 불러오기
+        const savedCustoms = localStorage.getItem('customGukbap');
+        if (savedCustoms) {
+            items = [...items, ...JSON.parse(savedCustoms)];
+        }
 
         let currentAmount = 0;
         const inputEl = document.getElementById('moneyInput');
@@ -349,6 +446,60 @@
                 `;
             });
             resultListEl.innerHTML = html;
+        }
+
+        // 커스텀 물가 폼 토글
+        function toggleForm() {
+            const form = document.getElementById('customForm');
+            const btn = document.getElementById('showFormBtn');
+            if (form.style.display === 'block') {
+                form.style.display = 'none';
+                btn.innerText = '+ 나만의 체감 물가 추가';
+            } else {
+                form.style.display = 'block';
+                btn.innerText = '닫기';
+            }
+        }
+
+        // 새 아이템 추가
+        function addCustomItem() {
+            const icon = document.getElementById('cIcon').value.trim() || '✨';
+            const name = document.getElementById('cName').value.trim();
+            const price = parseInt(document.getElementById('cPrice').value.trim(), 10);
+            const unit = document.getElementById('cUnit').value.trim() || '개';
+
+            if (!name || isNaN(price) || price <= 0) {
+                alert("이름과 정확한 가격을 입력해주세요!");
+                return;
+            }
+
+            const newItem = {
+                id: 'custom_' + Date.now(),
+                icon: icon,
+                name: name,
+                desc: '내가 설정한 기준가 ' + price.toLocaleString() + '원',
+                price: price,
+                unit: unit,
+                color: 'highlight-green'
+            };
+
+            items.push(newItem);
+
+            // 로컬스토리지 저장
+            const saved = localStorage.getItem('customGukbap');
+            const parsed = saved ? JSON.parse(saved) : [];
+            parsed.push(newItem);
+            localStorage.setItem('customGukbap', JSON.stringify(parsed));
+
+            // 초기화
+            document.getElementById('cIcon').value = '';
+            document.getElementById('cName').value = '';
+            document.getElementById('cPrice').value = '';
+            document.getElementById('cUnit').value = '';
+
+            toggleForm();
+            renderResults();
+            alert("나만의 감가 아이템이 추가되었습니다!");
         }
 
         // 초기 렌더링
