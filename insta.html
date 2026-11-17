@@ -775,21 +775,26 @@
             throw new Error("JSON 또는 ZIP 파일만 가능합니다.");
         }
 
+        function isValidUsername(value) {
+            return typeof value === 'string' && /^[A-Za-z0-9._]{1,30}$/.test(value);
+        }
+
         function extractUsers(json) {
             let allUsers = [];
             const parseArray = (list) => {
                 const users = [];
                 list.forEach(item => {
+                    if (!item || typeof item !== 'object') return;
                     let u = null;
                     if (item.string_list_data?.[0]?.value) u = item.string_list_data[0].value;
                     else if (item.title) u = item.title;
                     else if (item.value) u = item.value;
-                    if (u) users.push(u);
+                    if (isValidUsername(u)) users.push(u);
                 });
                 return users;
             };
             if (Array.isArray(json)) return parseArray(json);
-            if (typeof json === 'object') {
+            if (json && typeof json === 'object') {
                 Object.values(json).forEach(value => {
                     if (Array.isArray(value)) allUsers = [...allUsers, ...parseArray(value)];
                 });
@@ -838,28 +843,45 @@
 
         function renderList(list) {
             const userListDiv = document.getElementById('userList');
-            if (list.length === 0) {
-                userListDiv.innerHTML = `<div style="text-align:center; padding: 40px; color: var(--sub);">🎉 모두가 맞팔 중입니다!</div>`;
+            userListDiv.replaceChildren();
+            const users = list.filter(isValidUsername);
+            if (users.length === 0) {
+                const empty = document.createElement('div');
+                empty.style.cssText = 'text-align:center; padding:40px; color:var(--sub)';
+                empty.textContent = '🎉 모두가 맞팔 중입니다!';
+                userListDiv.append(empty);
                 return;
             }
-
-            const isUnfollowerTab = currentTab === 'unfollowers';
-            const prevList = isUnfollowerTab ? previousUnfollowerList : previousFanList;
-
-            let html = '';
-            list.forEach(user => {
-                const isNew = prevList && !prevList.includes(user);
-
-                html += `<div class="user-item">
-                    <div class="user-info">
-                        <div class="user-avatar">👤</div>
-                        <span class="user-name" onclick="copyId('${user}')" title="클릭하여 복사">${user}</span>
-                        ${isNew ? '<span class="new-badge">NEW</span>' : ''}
-                    </div>
-                    <a href="https://instagram.com/${user}" target="_blank" class="action-btn">확인 ></a>
-                </div>`;
+            const prevList = currentTab === 'unfollowers' ? previousUnfollowerList : previousFanList;
+            users.forEach(user => {
+                const row = document.createElement('div');
+                row.className = 'user-item';
+                const info = document.createElement('div');
+                info.className = 'user-info';
+                const avatar = document.createElement('div');
+                avatar.className = 'user-avatar';
+                avatar.textContent = '👤';
+                const name = document.createElement('span');
+                name.className = 'user-name';
+                name.title = '클릭하여 복사';
+                name.textContent = user;
+                name.addEventListener('click', () => copyId(user));
+                info.append(avatar, name);
+                if (prevList && !prevList.includes(user)) {
+                    const badge = document.createElement('span');
+                    badge.className = 'new-badge';
+                    badge.textContent = 'NEW';
+                    info.append(badge);
+                }
+                const link = document.createElement('a');
+                link.href = 'https://instagram.com/' + encodeURIComponent(user);
+                link.target = '_blank';
+                link.rel = 'noopener noreferrer';
+                link.className = 'action-btn';
+                link.textContent = '확인 >';
+                row.append(info, link);
+                userListDiv.append(row);
             });
-            userListDiv.innerHTML = html;
         }
 
         function filterList() {
@@ -871,7 +893,7 @@
         }
 
         function copyId(userId) {
-            navigator.clipboard.writeText(userId).then(() => {
+            return navigator.clipboard.writeText(userId).then(() => {
                 // Show a brief visual feedback or use a simple alert/toast
                 alert(`아이디 '${userId}' 복사 완료!`);
             });
