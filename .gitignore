@@ -9,3 +9,10 @@
 .idea/
 .DS_Store
 Thumbs.db
+
+# 비밀 정보·로컬 자격 증명 (커밋 금지)
+cookies.txt
+*.pem
+*.key
+token*.json
+credentials*.json

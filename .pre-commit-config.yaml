@@ -1,0 +1,7 @@
+# 커밋 직전 시크릿(API 키·토큰·비밀번호) 검사
+# 설치: pip install pre-commit && pre-commit install
+repos:
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.21.2
+    hooks:
+      - id: gitleaks
